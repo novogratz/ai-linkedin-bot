@@ -46,20 +46,36 @@ Rules:
 
 SOURCE_REFERENCES = [
     (
-        "Neolegal — legal marketing, automation et croissance pour cabinets d'avocats",
+        "Neolegal — produits juridiques en ligne, accès à la justice",
         "https://www.neolegal.ca",
     ),
     (
-        "Thomson Reuters and Anthropic expand Claude + CoCounsel Legal partnership",
+        "CanLII Search+ — moteur de recherche juridique IA gratuit pour tous les Canadiens (fév. 2026)",
+        "https://www.justice-quebec.ca/english-news/3033668_ai-is-moving-into-law-firms-and-canlii-just-opened-the-door-for-everyone",
+    ),
+    (
+        "LawDroid Legal Aid Plugin — plugin open-source gratuit pour l'aide juridique (mai 2026)",
+        "https://www.lawnext.com/2026/05/lawdroid-launches-free-open-source-claude-ai-plugin-for-civil-legal-aid.html",
+    ),
+    (
+        "Fixed-Fee Justice: how AI is reshaping legal billing — Angrove Law (avr. 2026)",
+        "https://borealsignal.ca/stories/fixed-fee-justice-how-ai-is-reshaping-legal-billing-and-access-to-counsel",
+    ),
+    (
+        "Litera State of Legal AI 2026 — 85% des cabinets subissent la pression client sur l'IA",
+        "https://digitalitnews.com/litera-releases-state-of-legal-ai-2026-report/",
+    ),
+    (
+        "Legal Technology Global Market Report 2026 — marché de $36B en 2026, croissance 9.2%",
+        "https://www.giiresearch.com/report/tbrc1975880-legal-technology-global-market-report.html",
+    ),
+    (
+        "Thomson Reuters + Anthropic expand Claude & CoCounsel Legal partnership (mai 2026)",
         "https://www.thomsonreuters.com/en/press-releases/2026/may/thomson-reuters-and-anthropic-expand-partnership-to-connect-claude-with-cocounsel-legal",
     ),
     (
-        "2026 Report on the State of the US Legal Market, Thomson Reuters + Georgetown Law",
+        "2026 Report on the State of the US Legal Market — Thomson Reuters + Georgetown Law",
         "https://www.thomsonreuters.com/en/press-releases/2026/january/legal-industry-experiencing-tectonic-shift-technology-talent-and-demand-prompting-law-firms-to-evolve",
-    ),
-    (
-        "Thomson Reuters Institute: 2026 AI in Professional Services report takeaways for legal teams",
-        "https://legal.thomsonreuters.com/blog/highlights-from-the-2026-ai-in-professional-services-report-and-what-it-means-for-legal-teams-tri/",
     ),
 ]
 
@@ -113,11 +129,15 @@ RÈGLES STRICTES:
 - N'invente JAMAIS un nom de source ou de rapport. Utilise UNIQUEMENT les URLs fournies ci-dessous. Ne les modifie pas.
 - N'invente JAMAIS de statistiques, pourcentages, ou données chiffrées. Si tu écris "75% des clients" ou "selon une étude", tu DOIS avoir vu ce chiffre exact dans la source. Dans le doute, n'en mets pas.
 - "services juridiques" est INTERDIT. C'est toujours "produits juridiques". Si tu écris "services juridiques", le post est rejeté.
-- Inclus AU MOINS UNE de ces URLs EXACTES:
+- Inclus AU MOINS UNE de ces URLs EXACTES (ce sont les SEULES sources autorisées):
   1. https://www.neolegal.ca
-  2. https://www.thomsonreuters.com/en/press-releases/2026/may/thomson-reuters-and-anthropic-expand-partnership-to-connect-claude-with-cocounsel-legal
-  3. https://www.thomsonreuters.com/en/press-releases/2026/january/legal-industry-experiencing-tectonic-shift-technology-talent-and-demand-prompting-law-firms-to-evolve
-  4. https://legal.thomsonreuters.com/blog/highlights-from-the-2026-ai-in-professional-services-report-and-what-it-means-for-legal-teams-tri/
+  2. https://www.justice-quebec.ca/english-news/3033668_ai-is-moving-into-law-firms-and-canlii-just-opened-the-door-for-everyone
+  3. https://www.lawnext.com/2026/05/lawdroid-launches-free-open-source-claude-ai-plugin-for-civil-legal-aid.html
+  4. https://borealsignal.ca/stories/fixed-fee-justice-how-ai-is-reshaping-legal-billing-and-access-to-counsel
+  5. https://digitalitnews.com/litera-releases-state-of-legal-ai-2026-report/
+  6. https://www.giiresearch.com/report/tbrc1975880-legal-technology-global-market-report.html
+  7. https://www.thomsonreuters.com/en/press-releases/2026/may/thomson-reuters-and-anthropic-expand-partnership-to-connect-claude-with-cocounsel-legal
+  8. https://www.thomsonreuters.com/en/press-releases/2026/january/legal-industry-experiencing-tectonic-shift-technology-talent-and-demand-prompting-law-firms-to-evolve
 - Termine par une question forte.
 
 PHRASES INTERDITES:
@@ -402,11 +422,15 @@ Règles:
 - Pas de statistiques inventées (X%, "selon une étude").
 - Sortie finale entre 1800 et 2500 caractères.
 - Ton personnel et direct.
-- Inclus au moins une URL exacte:
+- Inclus au moins une URL exacte (parmi la liste autorisée):
   - https://www.neolegal.ca
+  - https://www.justice-quebec.ca/english-news/3033668_ai-is-moving-into-law-firms-and-canlii-just-opened-the-door-for-everyone
+  - https://www.lawnext.com/2026/05/lawdroid-launches-free-open-source-claude-ai-plugin-for-civil-legal-aid.html
+  - https://borealsignal.ca/stories/fixed-fee-justice-how-ai-is-reshaping-legal-billing-and-access-to-counsel
+  - https://digitalitnews.com/litera-releases-state-of-legal-ai-2026-report/
+  - https://www.giiresearch.com/report/tbrc1975880-legal-technology-global-market-report.html
   - https://www.thomsonreuters.com/en/press-releases/2026/may/thomson-reuters-and-anthropic-expand-partnership-to-connect-claude-with-cocounsel-legal
   - https://www.thomsonreuters.com/en/press-releases/2026/january/legal-industry-experiencing-tectonic-shift-technology-talent-and-demand-prompting-law-firms-to-evolve
-  - https://legal.thomsonreuters.com/blog/highlights-from-the-2026-ai-in-professional-services-report-and-what-it-means-for-legal-teams-tri/
 - Retourne uniquement le texte final.
 
 Brouillon:
