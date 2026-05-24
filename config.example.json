@@ -1,0 +1,32 @@
+{
+  "ollama": {
+    "base_url": "http://localhost:11434",
+    "model": "llama3.1:latest",
+    "timeout_seconds": 600,
+    "temperature": 0.75,
+    "top_p": 0.9,
+    "num_predict": 1100,
+    "max_retries": 3,
+    "retry_delay_seconds": 5
+  },
+  "email": {
+    "smtp_host": "smtp.gmail.com",
+    "smtp_port": 587,
+    "use_tls": true,
+    "username": "${SMTP_USERNAME}",
+    "password": "${SMTP_PASSWORD}",
+    "from_email": "${SMTP_FROM_EMAIL}",
+    "from_name": "No Reply - Daily LinkedIn Bot",
+    "to_email": "elizabethkflannery@gmail.com",
+    "max_retries": 3,
+    "retry_delay_seconds": 5
+  },
+  "schedule": {
+    "daily_time": "06:00",
+    "timezone": "America/Toronto"
+  },
+  "storage": {
+    "posts_dir": "posts",
+    "logs_dir": "logs"
+  }
+}

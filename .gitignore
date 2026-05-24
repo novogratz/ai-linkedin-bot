@@ -1,0 +1,11 @@
+.env
+config.json
+posts/
+logs/
+.venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
