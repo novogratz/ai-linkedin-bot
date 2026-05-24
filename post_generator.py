@@ -84,6 +84,8 @@ SOURCE_REFERENCES = [
 
 SOURCE_URLS = {url for _, url in SOURCE_REFERENCES}
 SOURCE_URLS_LIST = list(SOURCE_URLS)
+CONTENT_SOURCE_URLS = SOURCE_URLS - {"https://www.neolegal.ca"}
+RECENT_HISTORY_LIMIT = 5
 
 # Known real stats from SOURCE_REFERENCES (used to catch invented numbers)
 KNOWN_PERCENTAGES = {"92%", "9.2%", "9,2%", "85%", "51%", "15%"}
@@ -152,6 +154,18 @@ RÈGLES STRICTES:
   6. https://www.thomsonreuters.com/en/press-releases/2026/may/thomson-reuters-and-anthropic-expand-partnership-to-connect-claude-with-cocounsel-legal
   7. https://www.thomsonreuters.com/en/press-releases/2026/january/legal-industry-experiencing-tectonic-shift-technology-talent-and-demand-prompting-law-firms-to-evolve
 - Termine par une question forte.
+
+MÉMOIRE DES POSTS RÉCENTS:
+{history_guidance}
+
+RÈGLES ANTI-RÉPÉTITION:
+- Ne répète pas les statistiques, URLs, exemples, hooks ou angles déjà utilisés dans les posts récents.
+- Si une statistique comme 85% a déjà servi récemment, elle est interdite aujourd'hui.
+- Choisis une seule idée forte. Pas de liste de tendances, pas de collage de rapports, pas de paragraphe "marché global".
+- Maximum 1 statistique externe dans tout le post.
+- Pas de citation en notes "(1)", "(2)", "(3)". L'URL exacte doit être écrite dans la phrase.
+- Pas de section "Source:" à la fin.
+- Ne mentionne jamais un prix Neolegal précis sauf s'il est fourni dans les sources autorisées.
 
 PHRASES INTERDITES:
 "révolution de l'IA", "changer la donne", "à l'ère du digital", "le futur est maintenant",
@@ -275,6 +289,7 @@ class PostGenerator:
                 prompt = USER_PROMPT_TEMPLATE.format(
                     today=post_date.isoformat(),
                     angle_instruction=angle,
+                    history_guidance=self._history_guidance(),
                 )
                 self.logger.info("Generating LinkedIn post with Ollama model %s", self.config.model)
                 post = self._call_ollama(prompt)
@@ -444,9 +459,7 @@ Post à raccourcir:
         found_urls = set(re.findall(r"https?://\S+", post))
         if real_urls & found_urls:
             return post
-        source_lines = "\n\nSource:\n"
-        source_lines += f"- {SOURCE_REFERENCES[0][0]}: {SOURCE_REFERENCES[0][1]}"
-        return f"{post.rstrip()}{source_lines}"
+        return f"{post.rstrip()}\n\nPlus d'info sur les produits juridiques à forfait: https://www.neolegal.ca"
 
     @staticmethod
     def _auto_fix(post: str) -> str:
@@ -506,7 +519,8 @@ Post à raccourcir:
             "le futur est maintenant", "game changer", "monde numérique",
             "nouvelle ère", "transformation sans précédent",
             "alors que les autres", "pendant que d'autres",
-            "contrairement aux autres",
+            "contrairement aux autres", "c'est une semaine dernière",
+            "partagez vos idées avec nous", "marché des produits juridiques est en train de se réveiller",
         ]
         for phrase in banned:
             if phrase.lower() in post.lower():
@@ -526,6 +540,26 @@ Post à raccourcir:
         if re.search(r"\*\*.*?\*\*", post):
             raise PostGenerationError("Le post contient du gras (**texte**). Interdit.")
 
+        if re.search(r"\n\s*source\s*:", post, flags=re.IGNORECASE):
+            raise PostGenerationError("Section 'Source:' détectée. Les URLs doivent être intégrées en ligne.")
+
+        if re.search(r"\(\s*\d+\s*\)", post):
+            raise PostGenerationError("Citation en note détectée: utilise l'URL exacte en ligne, pas (1), (2), etc.")
+
+        found_urls = {url.rstrip(").,;:!?") for url in re.findall(r"https?://\S+", post)}
+        invalid_urls = found_urls - SOURCE_URLS
+        if invalid_urls:
+            raise PostGenerationError(
+                f"URL non autorisée détectée: {', '.join(sorted(invalid_urls))}."
+            )
+
+        recent_urls = self._recent_source_urls()
+        repeated_urls = (found_urls & CONTENT_SOURCE_URLS) & recent_urls
+        if repeated_urls and len(recent_urls) < len(CONTENT_SOURCE_URLS):
+            raise PostGenerationError(
+                f"Source déjà utilisée récemment: {', '.join(sorted(repeated_urls))}."
+            )
+
         # catch invented percentages not in KNOWN_PERCENTAGES
         found_pcts = set(re.findall(r"\b\d+(?:[.,]\d+)?%", post))
         invented_pcts = found_pcts - KNOWN_PERCENTAGES
@@ -533,6 +567,32 @@ Post à raccourcir:
             raise PostGenerationError(
                 f"Statistique inventée détectée: {', '.join(sorted(invented_pcts))}. "
                 f"Seuls les chiffres réels des sources sont autorisés."
+            )
+
+        repeated_stats = found_pcts & self._recent_percentages()
+        if repeated_stats:
+            raise PostGenerationError(
+                f"Statistique déjà utilisée récemment: {', '.join(sorted(repeated_stats))}."
+            )
+
+        if len(found_pcts) > 1:
+            raise PostGenerationError("Trop de statistiques dans le post. Maximum 1 statistique externe.")
+
+        dollar_values = set(re.findall(
+            r"(?:\$|CA\$)\s?\d+(?:[.,]\d+)?\s?(?:B|M|milliards?|millions?)?"
+            r"|\d[\d\s]*\s?\$"
+            r"|\b\d+(?:[.,]\d+)?\s?(?:milliards?|millions?)\s+de\s+dollars",
+            post,
+            flags=re.IGNORECASE,
+        ))
+        allowed_dollar = {
+            "$36.01B", "$51.21B", "$411B", "$2,000", "$3,000", "$5,000",
+            "$2000", "$3000", "$5000", "15 000$",
+        }
+        invented_dollars = {value for value in dollar_values if normalize_money(value) not in {normalize_money(item) for item in allowed_dollar}}
+        if invented_dollars:
+            raise PostGenerationError(
+                f"Montant non sourcé détecté: {', '.join(sorted(invented_dollars))}."
             )
 
         # catch invented fractions like "1/3", "1/2", "2/3" (but not dates "2026/05")
@@ -543,3 +603,53 @@ Post à raccourcir:
                 f"Fraction inventée détectée: {', '.join(sorted(real_fractions))}. "
                 f"Pas de fractions non sourcées."
             )
+
+    def _history_guidance(self) -> str:
+        recent_posts = self._recent_post_texts()
+        if not recent_posts:
+            return "- Aucun post récent sauvegardé."
+
+        recent_urls = sorted(self._recent_source_urls())
+        recent_pcts = sorted(self._recent_percentages())
+        hooks = []
+        for post in recent_posts:
+            first_line = next((line.strip() for line in post.splitlines() if line.strip()), "")
+            if first_line:
+                hooks.append(first_line[:180])
+
+        lines = [
+            "- Interdit de reprendre ces hooks récents: " + " | ".join(hooks[:RECENT_HISTORY_LIMIT]),
+        ]
+        if recent_pcts:
+            lines.append("- Statistiques déjà utilisées récemment, donc interdites aujourd'hui: " + ", ".join(recent_pcts))
+        if recent_urls:
+            lines.append("- URLs déjà utilisées récemment, donc évite-les aujourd'hui: " + ", ".join(recent_urls))
+        lines.append("- Ne répète pas les thèmes déjà vus: pression client IA, marché global legaltech, 92% access to justice, taux horaire vs forfait.")
+        return "\n".join(lines)
+
+    def _recent_post_texts(self, limit: int = RECENT_HISTORY_LIMIT) -> list[str]:
+        candidates = sorted(self.posts_dir.glob("*.md"), key=lambda p: p.stat().st_mtime, reverse=True)
+        posts = []
+        for path in candidates[:limit]:
+            try:
+                text = path.read_text(encoding="utf-8")
+            except OSError:
+                continue
+            posts.append(re.sub(r"^#.*?\n+", "", text, flags=re.DOTALL).strip())
+        return posts
+
+    def _recent_source_urls(self) -> set[str]:
+        urls: set[str] = set()
+        for post in self._recent_post_texts():
+            urls.update(url.rstrip(").,;:!?") for url in re.findall(r"https?://\S+", post))
+        return urls & CONTENT_SOURCE_URLS
+
+    def _recent_percentages(self) -> set[str]:
+        percentages: set[str] = set()
+        for post in self._recent_post_texts():
+            percentages.update(re.findall(r"\b\d+(?:[.,]\d+)?%", post))
+        return percentages
+
+
+def normalize_money(value: str) -> str:
+    return re.sub(r"[\s,.]", "", value).lower().replace("ca$", "$")

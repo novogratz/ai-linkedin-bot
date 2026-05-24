@@ -53,10 +53,27 @@ class DailyLinkedInBot:
 
     def run_for_date(self, post_date: date, overwrite: bool = False) -> Path:
         """Generate, save, and email one LinkedIn post for a specific date."""
+        if self._daily_email_claimed(post_date):
+            latest_path = self.generator.latest_post_path()
+            self.logger.warning(
+                "Daily email safeguard skipped %s because an email was already claimed for this date.",
+                post_date.isoformat(),
+            )
+            if latest_path is not None:
+                return latest_path
+            return self._email_claim_path(post_date)
+
         self.logger.info("Starting LinkedIn post workflow for %s", post_date.isoformat())
         post = self.generator.generate_post(post_date)
         saved_path = self.generator.save_post(post, post_date, overwrite=overwrite)
+        if not self._claim_daily_email(post_date):
+            self.logger.warning(
+                "Daily email safeguard skipped sending %s because another run claimed it first.",
+                post_date.isoformat(),
+            )
+            return saved_path
         self.email_sender.send_post(post, post_date)
+        self._mark_daily_email_sent(post_date, saved_path)
         self.logger.info("LinkedIn post workflow completed")
         return saved_path
 
@@ -121,8 +138,34 @@ class DailyLinkedInBot:
         self.logger.info("Scheduler stopped")
 
     def request_shutdown(self, signum: int, frame: FrameType | None) -> None:
-        if signum == signal.SIGINT:
+        if signum in {signal.SIGINT, signal.SIGTERM}:
             self._shutdown_requested = True
+
+    def _claim_daily_email(self, post_date: date) -> bool:
+        """Atomically reserve the daily email slot before SMTP begins."""
+        marker_path = self._email_claim_path(post_date)
+        marker_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            fd = os.open(marker_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644)
+        except FileExistsError:
+            return False
+
+        with os.fdopen(fd, "w", encoding="utf-8") as marker:
+            marker.write(f"claimed_at={datetime.now().isoformat()}\n")
+            marker.write(f"pid={os.getpid()}\n")
+        return True
+
+    def _daily_email_claimed(self, post_date: date) -> bool:
+        return self._email_claim_path(post_date).exists()
+
+    def _mark_daily_email_sent(self, post_date: date, saved_path: Path) -> None:
+        marker_path = self._email_claim_path(post_date)
+        with marker_path.open("a", encoding="utf-8") as marker:
+            marker.write(f"sent_at={datetime.now().isoformat()}\n")
+            marker.write(f"post_path={saved_path}\n")
+
+    def _email_claim_path(self, post_date: date) -> Path:
+        return self.config.logs_dir / "email_sends" / f"{post_date.isoformat()}.sent"
 
 
 def load_config(path: Path) -> AppConfig:
@@ -258,7 +301,7 @@ def main() -> int:
         bot = DailyLinkedInBot(config, logger)
 
         signal.signal(signal.SIGINT, bot.request_shutdown)
-        signal.signal(signal.SIGTERM, signal.SIG_IGN)
+        signal.signal(signal.SIGTERM, bot.request_shutdown)
 
         if args.today:
             saved_path = bot.run_once()
