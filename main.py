@@ -106,9 +106,6 @@ class DailyLinkedInBot:
     def request_shutdown(self, signum: int, frame: FrameType | None) -> None:
         if signum == signal.SIGINT:
             self._shutdown_requested = True
-            self.logger.info("SIGINT received. Shutting down gracefully.")
-        else:
-            self.logger.info("Received signal %s. Ignoring (use Ctrl+C / SIGINT to stop).", signum)
 
 
 def load_config(path: Path) -> AppConfig:
@@ -244,7 +241,7 @@ def main() -> int:
         bot = DailyLinkedInBot(config, logger)
 
         signal.signal(signal.SIGINT, bot.request_shutdown)
-        signal.signal(signal.SIGTERM, bot.request_shutdown)
+        signal.signal(signal.SIGTERM, signal.SIG_IGN)
 
         if args.today:
             saved_path = bot.run_once()
