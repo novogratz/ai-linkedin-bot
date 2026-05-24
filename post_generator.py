@@ -165,10 +165,6 @@ class PostGenerationError(RuntimeError):
     """Raised when a post cannot be generated or validated."""
 
 
-class DuplicateTopicError(RuntimeError):
-    """Raised when generated post uses an already-used URL."""
-
-
 class TopicTracker:
     """Persists used URLs/angles so we never repeat a topic."""
 
@@ -260,9 +256,6 @@ class PostGenerator:
             angle.split(":")[0].replace("Point de vue", "").strip() or angle[:60],
         )
 
-        forbidden_urls = self.topic_tracker.available_urls()
-        used_urls = self.topic_tracker._used_urls.copy()
-
         for attempt in range(1, self.config.max_retries + 5):
             try:
                 prompt = USER_PROMPT_TEMPLATE.format(
@@ -288,31 +281,12 @@ class PostGenerator:
                 cleaned = self._ensure_source_url(cleaned)
                 self._validate_post(cleaned)
 
-                urls_in_post = set(re.findall(r"https?://\S+", cleaned))
-                used_source_urls = urls_in_post & SOURCE_URLS
-                repeated = used_source_urls & used_urls
-
-                if repeated:
-                    self.logger.warning(
-                        "⚠️  DUPLICATE URL DETECTED: %s. Rotating to new topic...",
-                        repeated,
-                    )
-                    angle = self.topic_tracker.fresh_angle()
-                    used_urls = self.topic_tracker._used_urls.copy()
-                    continue
-
                 self.topic_tracker.record(cleaned)
                 self.logger.info(
                     "✅ POST GENERATED — URL: %s",
-                    ", ".join(sorted(used_source_urls)) if used_source_urls else "neolegal.ca",
+                    ", ".join(sorted(set(re.findall(r"https?://\S+", cleaned)) & SOURCE_URLS)) or "neolegal.ca",
                 )
                 return cleaned
-
-            except DuplicateTopicError:
-                angle = self.topic_tracker.fresh_angle()
-                used_urls = self.topic_tracker._used_urls.copy()
-                self.logger.info("🔄 Switching to new angle: %s", angle[:80])
-                continue
 
             except Exception as exc:
                 self.logger.warning(
@@ -324,7 +298,6 @@ class PostGenerator:
                 if attempt < self.config.max_retries + 5:
                     time.sleep(self.config.retry_delay_seconds)
                     angle = self.topic_tracker.fresh_angle()
-                    used_urls = self.topic_tracker._used_urls.copy()
 
         raise PostGenerationError("Failed to generate a fresh post after exhausting all retries and topics")
 
