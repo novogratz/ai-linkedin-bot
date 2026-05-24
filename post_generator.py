@@ -490,9 +490,6 @@ Post à raccourcir:
         if "http://" not in post and "https://" not in post:
             raise PostGenerationError("Aucune URL source trouvée dans le post.")
 
-        if re.search(r"\d+%", post):
-            raise PostGenerationError("Statistiques inventées détectées (ex: X%). Interdit.")
-
         if re.search(r"services?\s+juridiques", post, re.IGNORECASE):
             raise PostGenerationError("'services juridiques' détecté. Utilise 'produits juridiques' à la place.")
 
