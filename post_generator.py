@@ -34,7 +34,6 @@ Rules:
 - Always position Neolegal naturally as the context ("chez Neolegal, on voit que...").
 - Use "produits juridiques" — never "services juridiques".
 - Hook hard in the first line. No fluff.
-- Use 6-9 emojis scattered naturally.
 - Reference 1-2 sources using EXACT URLs provided. Do not invent URLs.
 - NEVER invent statistics, percentages, or data points. If you write "X% des cabinets" or "selon une étude", you MUST have seen that exact number in the source. If you're not sure, don't include it.
 - End with a sharp question inviting comment.
@@ -125,7 +124,6 @@ RÈGLES STRICTES:
 - Opinion nette et défendable. Pas de neutralité.
 - Pas de hashtags du tout.
 - Pas de gras (**).
-- 6-9 émojis répartis.
 - N'invente JAMAIS un nom de source ou de rapport. Utilise UNIQUEMENT les URLs fournies ci-dessous. Ne les modifie pas.
 - N'invente JAMAIS de statistiques, pourcentages, ou données chiffrées. Si tu écris "75% des clients" ou "selon une étude", tu DOIS avoir vu ce chiffre exact dans la source. Dans le doute, n'en mets pas.
 - "services juridiques" est INTERDIT. C'est toujours "produits juridiques". Si tu écris "services juridiques", le post est rejeté.
@@ -283,7 +281,7 @@ class PostGenerator:
 
                 self.topic_tracker.record(cleaned)
                 self.logger.info(
-                    "✅ POST GENERATED — URL: %s",
+                    "POST GENERATED — URL: %s",
                     ", ".join(sorted(set(re.findall(r"https?://\S+", cleaned)) & SOURCE_URLS)) or "neolegal.ca",
                 )
                 return cleaned
@@ -322,7 +320,7 @@ class PostGenerator:
             path = self.posts_dir / f"{post_date.isoformat()}-linkedin-post{suffix}-{timestamp}.md"
 
         path.write_text(self._markdown_document(post, post_date), encoding="utf-8")
-        self.logger.info("💾 Saved LinkedIn post to %s", path)
+        self.logger.info("Saved LinkedIn post to %s", path)
         return path
 
     def latest_post_path(self) -> Path | None:
@@ -386,7 +384,6 @@ Conserve l'idée, le hook, les sources, le CTA, mais ajoute:
 - un exemple concret tiré du terrain,
 - Neolegal comme contexte naturel ("chez Neolegal..."),
 - plus de rythme et de sauts de ligne,
-- 6-9 emojis au total.
 
 Règles:
 - "produits juridiques" — pas "services juridiques".
@@ -416,7 +413,7 @@ Brouillon:
 Raccourcis ce post LinkedIn en français à 1800-2500 caractères maximum.
 Conserve le hook, l'idée principale, la source URL, le CTA.
 Supprime les répétitions, le filler, les phrases trop longues.
-Garde le ton personnel et direct. Garde 6-9 émojis.
+Garde le ton personnel et direct.
 Pas de hashtags. Pas de statistiques inventées (X%). "produits juridiques" — pas "services juridiques".
 Retourne uniquement le texte raccourci.
 
