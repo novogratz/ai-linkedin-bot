@@ -100,9 +100,9 @@ class DailyLinkedInBot:
         while not self._shutdown_requested:
             try:
                 schedule.run_pending()
+                time.sleep(1)
             except Exception:
                 self.logger.exception("Scheduler error, continuing...")
-            time.sleep(1)
 
         self.logger.info("Scheduler stopped")
 
