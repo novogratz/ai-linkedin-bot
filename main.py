@@ -51,16 +51,13 @@ class DailyLinkedInBot:
         return self.run_for_date(today, overwrite=overwrite_today)
 
     def run_for_date(self, post_date: date, overwrite: bool = False) -> Path:
-        """Generate, save, and email three LinkedIn post choices for a specific date."""
+        """Generate, save, and email one LinkedIn post for a specific date."""
         self.logger.info("Starting LinkedIn post workflow for %s", post_date.isoformat())
-        posts = self.generator.generate_post_choices(post_date, count=3)
-        saved_paths = [
-            self.generator.save_post(post, post_date, overwrite=overwrite, suffix=f"-option-{index}")
-            for index, post in enumerate(posts, start=1)
-        ]
-        self.email_sender.send_post_choices(posts, post_date)
+        post = self.generator.generate_post(post_date)
+        saved_path = self.generator.save_post(post, post_date, overwrite=overwrite)
+        self.email_sender.send_post(post, post_date)
         self.logger.info("LinkedIn post workflow completed")
-        return saved_paths[0]
+        return saved_path
 
     def regenerate_last(self) -> Path:
         """Regenerate the most recently saved post, or today's post if none exists."""
@@ -77,22 +74,25 @@ class DailyLinkedInBot:
         for offset in range(days):
             post_date = start_date + timedelta(days=offset)
             self.logger.info("Generating weekly draft for %s", post_date.isoformat())
-            posts = self.generator.generate_post_choices(post_date, count=3)
-            for index, post in enumerate(posts, start=1):
+            try:
+                post = self.generator.generate_post(post_date)
                 saved_paths.append(
-                    self.generator.save_post(post, post_date, overwrite=True, suffix=f"-option-{index}")
+                    self.generator.save_post(post, post_date, overwrite=True)
                 )
+            except Exception as exc:  # noqa: BLE001
+                self.logger.error("Failed to generate post for %s: %s", post_date.isoformat(), exc)
 
         return saved_paths
 
     def run_scheduler(self) -> None:
-        """Run the process daily until a shutdown signal is received."""
-        schedule.every().day.at(self.config.daily_time, self.config.timezone).do(self.run_once)
+        """Run immediately, then daily at configured time."""
         self.logger.info(
-            "Scheduler started. Daily run time: %s %s",
+            "Scheduler started. Daily run time: %s %s. Running first post now.",
             self.config.daily_time,
             self.config.timezone,
         )
+        self.run_once()
+        schedule.every().day.at(self.config.daily_time, self.config.timezone).do(self.run_once)
 
         while not self._shutdown_requested:
             schedule.run_pending()
@@ -225,7 +225,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--config", default=str(DEFAULT_CONFIG_PATH), help="Path to config.json")
     parser.add_argument("--today", action="store_true", help="Generate and email today's post now")
     parser.add_argument("--regenerate", action="store_true", help="Regenerate and email the most recent saved post")
-    parser.add_argument("--week", action="store_true", help="Generate and save seven days of three options without emailing")
+    parser.add_argument("--week", action="store_true", help="Generate and save seven days of posts without emailing")
     return parser.parse_args()
 
 

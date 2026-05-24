@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.neolegal.daily-linkedin-bot</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/benoitfloch/ai-linkedin-bot/.venv/bin/python</string>
+        <string>/Users/benoitfloch/ai-linkedin-bot/main.py</string>
+        <string>--today</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/Users/benoitfloch/ai-linkedin-bot</string>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>6</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>/Users/benoitfloch/ai-linkedin-bot/logs/launchd-stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/benoitfloch/ai-linkedin-bot/logs/launchd-stderr.log</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/Users/benoitfloch/ai-linkedin-bot/.venv/bin:/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+    <key>RunAtLoad</key>
+    <false/>
+    <key>KeepAlive</key>
+    <false/>
+</dict>
+</plist>

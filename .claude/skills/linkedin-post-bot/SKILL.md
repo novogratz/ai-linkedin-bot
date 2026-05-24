@@ -1,6 +1,6 @@
 ---
 name: linkedin-post-bot
-description: Maintain the AI LinkedIn bot that generates and emails three French Legal NeoTech LinkedIn post options daily. Use for content generation, schedule changes, SMTP configuration, and safe repo hygiene.
+description: Maintain the AI LinkedIn bot that generates and emails one French Legal NeoTech LinkedIn post daily. Use for content generation, schedule changes, SMTP configuration, and safe repo hygiene.
 ---
 
 # LinkedIn Post Bot
@@ -14,13 +14,17 @@ description: Maintain the AI LinkedIn bot that generates and emails three French
 
 ## Content Requirements
 
-- Always generate 3 choices.
+- Always generate 1 post per run (no multiple-choice selections).
 - The LinkedIn posts must be in French.
 - English source titles/URLs are acceptable.
-- Make posts personal, direct, and impactful.
+- Make posts personal, direct, and impactful - marketing voice, not CTO/tech jargon.
 - Avoid generic AI phrasing and corporate filler.
-- Keep posts around 1400-1900 characters.
-- Use 6-9 emojis and 4-6 hashtags.
+- Keep posts around 1800-2500 characters.
+- Use 6-9 emojis, NO hashtags.
+- Use "produits juridiques" — never "services juridiques".
+- Always mention Neolegal (https://www.neolegal.ca) naturally in the post.
+- Push Neolegal's real value prop: B2C legal products platform, lawyer collaboration network (qualified leads + admin handled), Suite Neolegal Affaire (NeoForm, NeoDoc, NeoDesk), Avocat dans la Poche.
+- Bring a fresh, specific take — not the same talking point everyone shares.
 
 ## Secret Handling
 

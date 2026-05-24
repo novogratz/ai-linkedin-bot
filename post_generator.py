@@ -14,25 +14,39 @@ import requests
 
 
 SYSTEM_PROMPT = """
-You are an elite LinkedIn content strategist specializing in Legal NeoTech Marketing.
-Write highly engaging daily LinkedIn posts in French for Elizabeth K. Flannery, Director of Marketing in Legal Tech.
+You are Elizabeth K. Flannery, Director of Marketing at Neolegal (https://www.neolegal.ca), Canada's first digital legal platform. You write LinkedIn posts in your own voice.
 
-Focus areas: AI in legal, data privacy (GDPR, CCPA), legal innovation, GenAI for law firms, blockchain in legal, future of legal marketing, thought leadership in legal tech.
+CRITICAL RULE — Entire post MUST be in French. Non-negotiable. Only source titles/URLs may be English.
+
+WHAT NEOLEGAL DOES (tell the real story):
+- A web platform (B2C) where consumers get legal products — fixed-fee, no hourly rates. Top products: civil, penal, family, business law.
+- A lawyer collaboration network — lawyers receive qualified leads without prospecting, generate documents via NeoDoc, and we handle all admin.
+- Suite Neolegal Affaire: NeoForm (info collection), NeoDoc (automated document generation), NeoDesk (practice management).
+- Avocat dans la Poche: legal access as an employee benefit for insurers and large employers.
+- Mission: increase access to justice by unbundling legal products.
+
+Focus areas: legaltech marketing, access to justice, legal product innovation, how tech unbundles legal services, lawyer-client relationships in a digital world.
 
 Rules:
-- Write the LinkedIn post itself entirely in French.
-- News/source titles and URLs may remain in English.
-- Start with a powerful hook.
-- Use a personal, executive, direct voice. Avoid sounding like a generic AI essay.
-- Use strategic emojis throughout, around 6-9 total.
-- Reference 1-2 credible recent sources using exact URLs provided by the user.
-- End with an engaging question and invitation to comment.
-- Add relevant hashtags.
-- Avoid generic phrases like "révolution de l'IA", "changer la donne", "à l'ère du digital", and "le futur est maintenant".
+- You are a MARKETER, not a CTO, not a privacy officer. Stay in your lane.
+- Bring a FRESH TAKE — say something that adds to the conversation, not rehash what everyone else says.
+- Always position Neolegal naturally as the context ("chez Neolegal, on voit que...").
+- Use "produits juridiques" — never "services juridiques".
+- Hook hard in the first line. No fluff.
+- Use 6-9 emojis scattered naturally.
+- Reference 1-2 sources using EXACT URLs provided. Do not invent URLs.
+- End with a sharp question inviting comment.
+- NEVER use bold (**text**).
+- NEVER use: "révolution de l'IA", "changer la donne", "à l'ère du digital", "le futur est maintenant", "game changer", "monde numérique", "nouvelle ère", "transformation sans précédent".
+- Write 6-8 short paragraphs with line breaks.
 """
 
 
 SOURCE_REFERENCES = [
+    (
+        "Neolegal — legal marketing, automation et croissance pour cabinets d'avocats",
+        "https://www.neolegal.ca",
+    ),
     (
         "Thomson Reuters and Anthropic expand Claude + CoCounsel Legal partnership",
         "https://www.thomsonreuters.com/en/press-releases/2026/may/thomson-reuters-and-anthropic-expand-partnership-to-connect-claude-with-cocounsel-legal",
@@ -42,10 +56,6 @@ SOURCE_REFERENCES = [
         "https://www.thomsonreuters.com/en/press-releases/2026/january/legal-industry-experiencing-tectonic-shift-technology-talent-and-demand-prompting-law-firms-to-evolve",
     ),
     (
-        "IAPP News: privacy, AI governance and digital responsibility",
-        "https://iapp.org/news",
-    ),
-    (
         "Thomson Reuters Institute: 2026 AI in Professional Services report takeaways for legal teams",
         "https://legal.thomsonreuters.com/blog/highlights-from-the-2026-ai-in-professional-services-report-and-what-it-means-for-legal-teams-tri/",
     ),
@@ -53,35 +63,50 @@ SOURCE_REFERENCES = [
 
 
 USER_PROMPT_TEMPLATE = """
-Crée une option de post LinkedIn du jour pour Elizabeth K. Flannery.
+Écris un post LinkedIn pour Elizabeth K. Flannery, Directrice Marketing chez Neolegal (https://www.neolegal.ca).
 
 Date: {today}
-Angle pour cette option: {angle_instruction}
-Audience: dirigeants de cabinets d'avocats, legal operations, fondateurs legal tech, professionnels privacy/data governance, équipes marketing B2B legal tech.
-Niche: Legal NeoTech Marketing, l'intersection entre droit, IA, GenAI, blockchain, data privacy, legal tech et stratégies marketing modernes.
+Angle: {angle_instruction}
+Audience: dirigeants de cabinets d'avocats, fondateurs legal tech, avocats en pratique privée, équipes marketing B2B legal tech.
 
-Exigences de sortie:
-- Le post LinkedIn doit être entièrement en français.
-- Les titres des sources peuvent rester en anglais, mais tout le commentaire doit être en français.
-- 1400-1900 caractères.
-- Écris 6-8 paragraphes courts avec une mini-section source et un CTA.
-- Ton personnel, professionnel, audacieux, moderne, clair.
-- Écris comme une dirigeante marketing legal tech qui partage une observation vécue, pas comme un rapport.
-- Utilise "je" ou "ce que je vois" quand c'est naturel.
-- Ajoute une opinion nette, mais défendable.
-- Relie le post à au moins une actualité récente ci-dessous.
-- Utilise au moins une URL exacte de cette liste:
-  1. Thomson Reuters and Anthropic expand Claude + CoCounsel Legal partnership - https://www.thomsonreuters.com/en/press-releases/2026/may/thomson-reuters-and-anthropic-expand-partnership-to-connect-claude-with-cocounsel-legal
-  2. 2026 State of the US Legal Market - https://www.thomsonreuters.com/en/press-releases/2026/january/legal-industry-experiencing-tectonic-shift-technology-talent-and-demand-prompting-law-firms-to-evolve
-  3. IAPP News: privacy, AI governance and digital responsibility - https://iapp.org/news
-  4. Thomson Reuters Institute: AI in Professional Services 2026 - https://legal.thomsonreuters.com/blog/highlights-from-the-2026-ai-in-professional-services-report-and-what-it-means-for-legal-teams-tri/
-- Utilise 6-9 emojis maximum, répartis naturellement dans le post.
-- Utilise des sauts de ligne fréquents.
-- Termine avec une question forte + invitation à commenter.
-- Ajoute 4-6 hashtags pertinents à la fin.
-- N'utilise pas de titre en gras.
-- Évite les formulations génériques comme "la révolution de l'IA", "game changer", "à l'ère du digital", "le futur est maintenant".
-- Retourne uniquement le texte du post LinkedIn. Aucune explication.
+CE QUE FAIT NEOLEGAL (sois précise):
+- Plateforme web B2C de produits juridiques à forfait (prix fixe, pas de taux horaire). Top produits: droit civil, penal, familial, affaires.
+- Réseau d'avocats collaborateurs qui recoivent des mandats qualifiés sans démarchage. NeoDoc genère les documents, Neolegal gère l'admin.
+- Suite Neolegal Affaire: NeoForm, NeoDoc, NeoDesk.
+- Avocat dans la Poche: avantage employé pour assureurs et grands employeurs.
+- Mission: augmenter l'accès à la justice en décomposant les produits juridiques.
+
+TON ET POSITIONNEMENT:
+- Directrice marketing, pas une CTO. Jargon technique interdit.
+- Apporte UN ANGLE NOUVEAU. Si c'est déjà dit 100 fois, trouve autre chose.
+- "produits juridiques" toujours — JAMAIS "services juridiques".
+- Mensione Neolegal comme contexte de ton insight: "chez Neolegal, on voit que...", "chez Neolegal, on a constaté...".
+- Observation concrète du terrain, pas de prédiction vague.
+
+RÈGLES STRICTES:
+- POST EN FRANÇAIS INTÉGRALEMENT.
+- 1800-2500 caractères.
+- 6-8 paragraphes courts.
+- Ton direct: "cette semaine, un avocat m'a dit...".
+- Opinion nette et défendable. Pas de neutralité.
+- Pas de hashtags du tout.
+- Pas de gras (**).
+- 6-9 émojis répartis.
+- N'invente JAMAIS un nom de source ou de rapport. Utilise UNIQUEMENT les URLs fournies ci-dessous. Ne les modifie pas.
+- "services juridiques" est INTERDIT. C'est toujours "produits juridiques". Si tu écris "services juridiques", le post est rejeté.
+- Inclus AU MOINS UNE de ces URLs EXACTES:
+  1. https://www.neolegal.ca
+  2. https://www.thomsonreuters.com/en/press-releases/2026/may/thomson-reuters-and-anthropic-expand-partnership-to-connect-claude-with-cocounsel-legal
+  3. https://www.thomsonreuters.com/en/press-releases/2026/january/legal-industry-experiencing-tectonic-shift-technology-talent-and-demand-prompting-law-firms-to-evolve
+  4. https://legal.thomsonreuters.com/blog/highlights-from-the-2026-ai-in-professional-services-report-and-what-it-means-for-legal-teams-tri/
+- Termine par une question forte.
+
+PHRASES INTERDITES:
+"révolution de l'IA", "changer la donne", "à l'ère du digital", "le futur est maintenant",
+"game changer", "monde numérique", "nouvelle ère", "transformation sans précédent",
+"services juridiques" (toujours "produits juridiques").
+
+Retourne UNIQUEMENT le texte du post LinkedIn. Aucun titre, aucune introduction, aucune explication.
 """
 
 
@@ -129,11 +154,19 @@ class PostGenerator:
                 self.logger.info("Generating LinkedIn post with Ollama model %s", self.config.model)
                 post = self._call_ollama(prompt)
                 cleaned = self._clean_response(post)
+
                 expansion_count = 0
-                while len(cleaned) < 1300 and expansion_count < 2:
-                    self.logger.info("Generated post is short (%s characters). Expanding draft.", len(cleaned))
+                while len(cleaned) < 1000 and expansion_count < 2:
+                    self.logger.info("Post trop court (%s caractères). Expansion en cours.", len(cleaned))
                     cleaned = self._expand_post(cleaned, post_date)
                     expansion_count += 1
+
+                shrink_count = 0
+                while len(cleaned) > 2500 and shrink_count < 2:
+                    self.logger.info("Post trop long (%s caractères). Raccourcissement en cours.", len(cleaned))
+                    cleaned = self._shrink_post(cleaned, post_date)
+                    shrink_count += 1
+
                 cleaned = self._ensure_source_url(cleaned)
                 self._validate_post(cleaned)
                 return cleaned
@@ -206,47 +239,92 @@ class PostGenerator:
 
         content = data.get("message", {}).get("content")
         if not content:
+            thinking = data.get("message", {}).get("thinking", "")
+            if thinking:
+                self.logger.info("Content was empty, extracting answer from thinking field")
+                return self._extract_answer_from_thinking(str(thinking))
             raise PostGenerationError(f"Ollama returned an unexpected response: {data}")
         return str(content)
 
+    @staticmethod
+    def _extract_answer_from_thinking(thinking: str) -> str:
+        """Extract the final answer from a thinking field of a reasoning model.
+
+        Reasoning models output their chain of thought in the thinking field,
+        then the final answer. This method tries to extract just the answer.
+        """
+        candidates = []
+
+        lines = thinking.split("\n")
+        half = len(lines) // 2
+        candidates.append("\n".join(lines[half:]))
+
+        paragraphs = thinking.split("\n\n")
+        if len(paragraphs) > 2:
+            candidates.append("\n\n".join(paragraphs[1:]))
+        if len(paragraphs) > 4:
+            candidates.append("\n\n".join(paragraphs[len(paragraphs) // 2:]))
+
+        last_third_start = len(thinking) * 2 // 3
+        candidates.append(thinking[last_third_start:])
+
+        candidates.sort(key=len)
+        return candidates[0]
+
     def _expand_post(self, draft: str, post_date: date) -> str:
         prompt = f"""
-Développe ce post LinkedIn en français pour Elizabeth K. Flannery afin d'obtenir un post final complet de 1400-1900 caractères.
+Développe ce post LinkedIn en français pour Elizabeth K. Flannery, Directrice Marketing chez Neolegal, afin d'obtenir un post final complet de 1800-2500 caractères.
 
 Date: {post_date.isoformat()}
 
-Conserve l'idée, le hook, les sources, le CTA et les hashtags, mais ajoute:
-- une analyse exécutive plus nette,
-- un framework pratique très court,
-- une implication plus forte pour le Legal NeoTech Marketing,
+Conserve l'idée, le hook, les sources, le CTA, mais ajoute:
+- une observation marketing plus nette,
+- un exemple concret tiré du terrain,
+- Neolegal comme contexte naturel ("chez Neolegal..."),
 - plus de rythme et de sauts de ligne,
 - 6-9 emojis au total.
 
 Règles:
-- Sortie finale entièrement en français.
-- Les titres de sources peuvent rester en anglais.
-- Sortie finale entre 1400 et 1900 caractères.
-- Utilise 6-9 emojis maximum.
-- Ton personnel, direct, moins "IA générative".
-- N'utilise pas de titre en gras.
+- "produits juridiques" — pas "services juridiques".
+- Pas de hashtags.
+- Pas de gras (**).
+- Sortie finale entre 1800 et 2500 caractères.
+- Ton personnel et direct.
 - Inclus au moins une URL exacte:
+  - https://www.neolegal.ca
   - https://www.thomsonreuters.com/en/press-releases/2026/may/thomson-reuters-and-anthropic-expand-partnership-to-connect-claude-with-cocounsel-legal
   - https://www.thomsonreuters.com/en/press-releases/2026/january/legal-industry-experiencing-tectonic-shift-technology-talent-and-demand-prompting-law-firms-to-evolve
-  - https://iapp.org/news
   - https://legal.thomsonreuters.com/blog/highlights-from-the-2026-ai-in-professional-services-report-and-what-it-means-for-legal-teams-tri/
-- Retourne uniquement le texte final du post LinkedIn.
+- Retourne uniquement le texte final.
 
 Brouillon:
 {draft}
 """
         return self._clean_response(self._call_ollama(prompt))
 
+    def _shrink_post(self, draft: str, post_date: date) -> str:
+        prompt = f"""
+Raccourcis ce post LinkedIn en français à 1800-2500 caractères maximum.
+Conserve le hook, l'idée principale, la source URL, le CTA.
+Supprime les répétitions, le filler, les phrases trop longues.
+Garde le ton personnel et direct. Garde 6-9 émojis.
+Pas de hashtags. "produits juridiques" — pas "services juridiques".
+Retourne uniquement le texte raccourci.
+
+Post à raccourcir:
+{draft}
+"""
+        return self._clean_response(self._call_ollama(prompt))
+
     @staticmethod
     def _ensure_source_url(post: str) -> str:
-        if "http://" in post or "https://" in post:
+        real_urls = {url for _, url in SOURCE_REFERENCES}
+        found_urls = set(re.findall(r"https?://\S+", post))
+
+        if real_urls & found_urls:
             return post
 
-        source_lines = "\n\nSources à lire:\n"
+        source_lines = "\n\nSources:\n"
         source_lines += "\n".join(f"- {title}: {url}" for title, url in SOURCE_REFERENCES[:2])
         return f"{post.rstrip()}{source_lines}"
 
@@ -259,6 +337,9 @@ Brouillon:
         cleaned = re.sub(r"(?i)^here'?s the final linkedin post:\s*", "", cleaned).strip()
         cleaned = re.sub(r"(?i)^here is the linkedin post:\s*", "", cleaned).strip()
         cleaned = re.sub(r"(?i)^voici le post linkedin final\s*:?\s*", "", cleaned).strip()
+        cleaned = re.sub(r"(?i)^voici le post\s*:?\s*", "", cleaned).strip()
+        cleaned = re.sub(r"(?i)^option \d+[:\s]*", "", cleaned).strip()
+        cleaned = re.sub(r"\*\*(.*?)\*\*", r"\1", cleaned)  # strip bold markers
         return cleaned.strip()
 
     @staticmethod
@@ -267,14 +348,25 @@ Brouillon:
 
     def _validate_post(self, post: str) -> None:
         char_count = len(post)
-        if char_count < 1300:
-            raise PostGenerationError(f"Generated post is too short ({char_count} characters).")
-        if char_count > 2200:
-            raise PostGenerationError(f"Generated post is too long ({char_count} characters).")
-
-        hashtags = re.findall(r"#[^\s#]+", post)
-        if len(hashtags) < 4:
-            raise PostGenerationError("Generated post does not include enough hashtags.")
+        if char_count < 1000:
+            raise PostGenerationError(f"Post trop court ({char_count} caractères). Minimum 1000.")
+        if char_count > 2500:
+            raise PostGenerationError(f"Post trop long ({char_count} caractères). Maximum 2500.")
 
         if "http://" not in post and "https://" not in post:
-            raise PostGenerationError("Generated post does not include an external source URL.")
+            raise PostGenerationError("Aucune URL source trouvée dans le post.")
+
+        if re.search(r"services?\s+juridiques", post, re.IGNORECASE):
+            raise PostGenerationError("'services juridiques' détecté. Utilise 'produits juridiques' à la place.")
+
+        banned = [
+            "révolution de l'IA", "changer la donne", "à l'ère du digital",
+            "le futur est maintenant", "game changer", "monde numérique",
+            "nouvelle ère", "transformation sans précédent",
+        ]
+        for phrase in banned:
+            if phrase.lower() in post.lower():
+                raise PostGenerationError(f"Phrase interdite détectée: '{phrase}'")
+
+        if re.search(r"\*\*.*?\*\*", post):
+            raise PostGenerationError("Le post contient du gras (**texte**). Interdit.")

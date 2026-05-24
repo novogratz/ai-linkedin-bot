@@ -1,11 +1,11 @@
 {
   "ollama": {
     "base_url": "http://localhost:11434",
-    "model": "llama3.1:latest",
+    "model": "qwen3.6:35b-a3b",
     "timeout_seconds": 600,
     "temperature": 0.75,
     "top_p": 0.9,
-    "num_predict": 1100,
+    "num_predict": 4000,
     "max_retries": 3,
     "retry_delay_seconds": 5
   },
