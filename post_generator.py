@@ -41,6 +41,7 @@ Rules:
 - NEVER use bold (**text**).
 - NEVER use: "révolution de l'IA", "changer la donne", "à l'ère du digital", "le futur est maintenant", "game changer", "monde numérique", "nouvelle ère", "transformation sans précédent".
 - FRENCH QUALITY: "pensez-vous" (jamais "penser-vous"), "croyez-vous" (jamais "croire-vous"), conjugue toujours correctement.
+- NO EM DASHES: utilise ":" ou "-" au lieu de "—". Jamais de tiret cadratin.
 - Write 6-8 short paragraphs with line breaks.
 """
 
