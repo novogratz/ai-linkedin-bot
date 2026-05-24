@@ -34,8 +34,9 @@ Rules:
 - Always position Neolegal naturally as the context ("chez Neolegal, on voit que...").
 - Use "produits juridiques" — never "services juridiques".
 - Hook hard in the first line. No fluff.
+- USE REAL NUMBERS from the sources to make it impactful. Each source has real data below.
 - Reference 1-2 sources using EXACT URLs provided. Do not invent URLs.
-- NEVER invent statistics, percentages, or data points. If you write "X% des cabinets" or "selon une étude", you MUST have seen that exact number in the source. If you're not sure, don't include it.
+- NEVER invent statistics. Only use numbers you've seen in the provided sources.
 - End with a sharp question inviting comment.
 - NEVER use bold (**text**).
 - NEVER use: "révolution de l'IA", "changer la donne", "à l'ère du digital", "le futur est maintenant", "game changer", "monde numérique", "nouvelle ère", "transformation sans précédent".
@@ -50,31 +51,31 @@ SOURCE_REFERENCES = [
         "https://www.neolegal.ca",
     ),
     (
-        "CanLII Search+ — moteur de recherche juridique IA gratuit pour tous les Canadiens (fév. 2026)",
+        "CanLII Search+ — moteur de recherche juridique IA gratuit accessible à tous les Canadiens (fév. 2026)",
         "https://www.justice-quebec.ca/english-news/3033668_ai-is-moving-into-law-firms-and-canlii-just-opened-the-door-for-everyone",
     ),
     (
-        "LawDroid Legal Aid Plugin — plugin open-source gratuit pour l'aide juridique (mai 2026)",
+        "LawDroid Legal Aid Plugin — plugin open-source gratuit pour l'aide juridique. 92% des Américains à faible revenu sans aide juridique suffisante (LSC Justice Gap). (mai 2026)",
         "https://www.lawnext.com/2026/05/lawdroid-launches-free-open-source-claude-ai-plugin-for-civil-legal-aid.html",
     ),
     (
-        "Fixed-Fee Justice: how AI is reshaping legal billing — Angrove Law (avr. 2026)",
+        "Fixed-Fee Justice: Angrove Law passe au forfait avec l'IA — prix fixes de 2000-3000$ vs 5000$+ au taux horaire. (avr. 2026)",
         "https://borealsignal.ca/stories/fixed-fee-justice-how-ai-is-reshaping-legal-billing-and-access-to-counsel",
     ),
     (
-        "Litera State of Legal AI 2026 — 85% des cabinets subissent la pression client sur l'IA",
+        "Litera State of Legal AI 2026 — 85% des cabinets subissent la pression client sur l'IA, 51% des clients ont influencé un investissement IA. Seulement 15% des décisions IA sont encore internes.",
         "https://digitalitnews.com/litera-releases-state-of-legal-ai-2026-report/",
     ),
     (
-        "Legal Technology Global Market Report 2026 — marché de $36B en 2026, croissance 9.2%",
+        "Legal Technology Global Market Report 2026 — marché de $36.01B en 2026, croissance 9.2% CAGR, prévu à $51.21B en 2030.",
         "https://www.giiresearch.com/report/tbrc1975880-legal-technology-global-market-report.html",
     ),
     (
-        "Thomson Reuters + Anthropic expand Claude & CoCounsel Legal partnership (mai 2026)",
+        "Thomson Reuters + Anthropic — expansion du partenariat Claude & CoCounsel Legal (mai 2026)",
         "https://www.thomsonreuters.com/en/press-releases/2026/may/thomson-reuters-and-anthropic-expand-partnership-to-connect-claude-with-cocounsel-legal",
     ),
     (
-        "2026 Report on the State of the US Legal Market — Thomson Reuters + Georgetown Law",
+        "2026 Report on the State of the US Legal Market — Thomson Reuters + Georgetown Law. L'industrie juridique américaine: $411B, 165,000+ établissements, 1.09M employés.",
         "https://www.thomsonreuters.com/en/press-releases/2026/january/legal-industry-experiencing-tectonic-shift-technology-talent-and-demand-prompting-law-firms-to-evolve",
     ),
 ]
@@ -116,6 +117,7 @@ TON ET POSITIONNEMENT:
 - "produits juridiques" toujours — JAMAIS "services juridiques".
 - Mensione Neolegal comme contexte de ton insight: "chez Neolegal, on voit que...", "chez Neolegal, on a constaté...".
 - Observation concrète du terrain, pas de prédiction vague.
+- Utilise des CHIFFRES RÉELS des sources pour frapper fort. Une donnée concrète rend un post 10x plus partageable.
 
 RÈGLES STRICTES:
 - POST EN FRANÇAIS INTÉGRALEMENT.
@@ -125,9 +127,9 @@ RÈGLES STRICTES:
 - Opinion nette et défendable. Pas de neutralité.
 - Pas de hashtags du tout.
 - Pas de gras (**).
-- N'invente JAMAIS un nom de source ou de rapport. Utilise UNIQUEMENT les URLs fournies ci-dessous. Ne les modifie pas.
-- N'invente JAMAIS de statistiques, pourcentages, ou données chiffrées. Si tu écris "75% des clients" ou "selon une étude", tu DOIS avoir vu ce chiffre exact dans la source. Dans le doute, n'en mets pas.
-- "services juridiques" est INTERDIT. C'est toujours "produits juridiques". Si tu écris "services juridiques", le post est rejeté.
+- N'invente JAMAIS un nom de source ou de rapport. Utilise UNIQUEMENT les URLs fournies ci-dessous.
+- N'invente JAMAIS de chiffres. Chaque nombre que tu écris doit venir textuellement de la source.
+- "services juridiques" est INTERDIT. C'est toujours "produits juridiques".
 - Inclus AU MOINS UNE de ces URLs EXACTES (ce sont les SEULES sources autorisées):
   1. https://www.neolegal.ca
   2. https://www.justice-quebec.ca/english-news/3033668_ai-is-moving-into-law-firms-and-canlii-just-opened-the-door-for-everyone
