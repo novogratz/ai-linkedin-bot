@@ -31,17 +31,22 @@ Focus areas: legaltech marketing, access to justice, legal product innovation, h
 Rules:
 - You are a MARKETER, not a CTO, not a privacy officer. Stay in your lane.
 - Bring a FRESH TAKE : say something that adds to the conversation, not rehash what everyone else says.
-- Always position Neolegal naturally as the context ("chez Neolegal, on voit que...").
+- HOOK HARD IN THE FIRST LINE. Open with a personal story, a conversation you had, or a sharp observation. NEVER open with "Chez Neolegal".
+- "Chez Neolegal" or "notre expérience" max 2 times total, used naturally mid-post as context.
+- Neolegal IS an AI/tech platform (NeoDoc, web platform, automated workflows). Never imply Neolegal doesn't do AI or tech.
 - Use "produits juridiques" : never "services juridiques".
-- Hook hard in the first line. No fluff.
 - USE REAL NUMBERS from the sources to make it impactful. Each source has real data below.
 - Reference 1-2 sources using EXACT URLs provided. Do not invent URLs.
+- INTEGRATE URLs INLINE in the text, right next to the stat they support. NO "Sources:" section at the end.
+- Chaque chiffre/statistique doit être immédiatement suivi de sa source URL entre parenthèses. Exemple: "(https://borealsignal.ca/...)"
 - NEVER invent statistics. Only use numbers you've seen in the provided sources.
 - End with a sharp question inviting comment.
 - NEVER use bold (**text**).
 - NEVER use: "révolution de l'IA", "changer la donne", "à l'ère du digital", "le futur est maintenant", "game changer", "monde numérique", "nouvelle ère", "transformation sans précédent".
+- NEVER create false opposition: ne dis pas "alors que les autres / pendant que d'autres / contrairement aux autres" pour sous-entendre que Neolegal ne fait pas d'IA ou de tech.
 - FRENCH QUALITY: "pensez-vous" (jamais "penser-vous"), "croyez-vous" (jamais "croire-vous"), conjugue toujours correctement.
 - NO EM DASHES: utilise ":" ou "-" au lieu de "—". Jamais de tiret cadratin.
+- VARY YOUR SENTENCE STRUCTURE. Don't start three paragraphs in a row with the same word.
 - Write 6-8 short paragraphs with line breaks.
 """
 
@@ -50,10 +55,6 @@ SOURCE_REFERENCES = [
     (
         "Neolegal : produits juridiques en ligne, accès à la justice",
         "https://www.neolegal.ca",
-    ),
-    (
-        "CanLII Search+ : moteur de recherche juridique IA gratuit accessible à tous les Canadiens (fév. 2026)",
-        "https://www.justice-quebec.ca/english-news/3033668_ai-is-moving-into-law-firms-and-canlii-just-opened-the-door-for-everyone",
     ),
     (
         "LawDroid Legal Aid Plugin : plugin open-source gratuit pour l'aide juridique. 92% des Américains à faible revenu sans aide juridique suffisante (LSC Justice Gap). (mai 2026)",
@@ -84,17 +85,22 @@ SOURCE_REFERENCES = [
 SOURCE_URLS = {url for _, url in SOURCE_REFERENCES}
 SOURCE_URLS_LIST = list(SOURCE_URLS)
 
+# Known real stats from SOURCE_REFERENCES (used to catch invented numbers)
+KNOWN_PERCENTAGES = {"92%", "9.2%", "9,2%", "85%", "51%", "15%"}
+KNOWN_DOLLAR_PATTERNS = [r"\$36\.01B", r"\$51\.21B", r"\$411B", r"\$2[\.,]?000", r"\$3[\.,]?000", r"\$5[\.,]?000", r"15\s?000\$"]
+KNOWN_COUNTS = {"1.09M", "165 000", "165,000", "5000", "3000", "2000"}
+
 ANGLES = [
-    "Point de vue: les cabinets d'avocats qui adoptent le marketing digital gagnent des parts de marché. Donne un exemple concret vu chez Neolegal.",
-    "Point de vue: le pricing à forfait vs taux horaire : pourquoi les clients choisissent les produits juridiques décomposés. Observation terrain.",
-    "Point de vue: comment les avocats peuvent transformer leur pratique avec des leads qualifiés sans démarchage. Ce que ça change pour leur croissance.",
-    "Point de vue: l'accès à la justice passe par la simplicité : ce que j'observe chez les consommateurs de produits juridiques en ligne.",
-    "Point de vue: pourquoi les assureurs et grands employeurs ajoutent l'accès juridique aux avantages sociaux. Tendance de fond.",
-    "Point de vue: le legal marketing B2C vs B2B : deux mondes, une seule mission : rendre le droit accessible.",
-    "Point de vue: ce que la génération de documents automatisée change dans la relation avocat-client.",
-    "Point de vue: legaltech et confiance : comment les plateformes comme Neolegal construisent la crédibilité auprès du grand public.",
-    "Point de vue: l'essor des produits juridiques à prix fixe : une tendance qui force les cabinets traditionnels à se réinventer.",
-    "Point de vue: acquisition client en legaltech : pourquoi le bouche-à-oreille et la simplicité battent les gros budgets pub.",
+    "Un cabinet m'a confié qu'il dépense une part énorme de son budget en prospection vs presque rien sur NeoDoc. Raconte cette conversation.",
+    "Un client qui a acheté un forfait droit familial a économisé vs son avocat au taux horaire. Raconte son histoire.",
+    "J'ai discuté avec un assureur qui cherche à intégrer Avocat dans la Poche pour ses employés. Explique pourquoi c'est une tendance lourde.",
+    "Un avocat collaborateur Neolegal m'a dit qu'il a doublé son chiffre sans toucher à son taux horaire. Comment? NeoDoc et les mandats qualifiés.",
+    "Un consommateur m'a écrit hier: 'j'ai eu ma réponse en 10 minutes sur Neolegal, mon avocat mettait 3 jours à me répondre.' Creuse cette différence.",
+    "Les cycles de vente legaltech B2C durent quelques jours. B2B dure des mois. Explique ce contraste et pourquoi Neolegal fait les deux.",
+    "Un avocat de 60 ans m'a dit: 'je pensais que la tech c'était pour les jeunes, puis j'ai utilisé NeoDoc'. Raconte ce moment de bascule.",
+    "92% des gens à faible revenu n'ont pas accès à l'aide juridique suffisante (LSC Justice Gap). Comment les produits à forfait changent ça.",
+    "Avant, les cabinets dépensaient des fortunes en Google Ads pour des leads moyens. Avec Neolegal, ça coûte rien pour des mandats qualifiés.",
+    "Le taux horaire cache un problème: le client paie pour l'inefficacité du cabinet. Les produits juridiques à forfait alignent les intérêts. Explique.",
 ]
 
 
@@ -115,8 +121,11 @@ CE QUE FAIT NEOLEGAL (sois précise):
 TON ET POSITIONNEMENT:
 - Directrice marketing, pas une CTO. Jargon technique interdit.
 - Apporte UN ANGLE NOUVEAU. Si c'est déjà dit 100 fois, trouve autre chose.
+- OUVRE PAR UNE ACCROCHE PERSONNELLE. Une conversation, une anecdote, une observation du terrain. JAMAIS "Chez Neolegal" en ouverture.
+- "Chez Neolegal" ou "notre expérience" max 2 fois dans le post, utilisé naturellement en milieu de texte.
+- VARIE TES PHRASES. Ne commence pas deux paragraphes consécutifs par le même mot.
 - "produits juridiques" toujours : JAMAIS "services juridiques".
-- Mensione Neolegal comme contexte de ton insight: "chez Neolegal, on voit que...", "chez Neolegal, on a constaté...".
+- Neolegal utilise l'IA et la tech (NeoDoc, plateforme, automatisation). Ne sous-entends JAMAIS que Neolegal ne fait pas d'IA.
 - Observation concrète du terrain, pas de prédiction vague.
 - Utilise des CHIFFRES RÉELS des sources pour frapper fort. Une donnée concrète rend un post 10x plus partageable.
 
@@ -130,22 +139,25 @@ RÈGLES STRICTES:
 - Pas de gras (**).
 - N'invente JAMAIS un nom de source ou de rapport. Utilise UNIQUEMENT les URLs fournies ci-dessous.
 - N'invente JAMAIS de chiffres. Chaque nombre que tu écris doit venir textuellement de la source.
+- Chaque chiffre/statistique doit être IMMÉDIATEMENT suivi de sa source URL entre parenthèses. Exemple: "... 85% des cabinets subissent la pression client sur l'IA (https://digitalitnews.com/litera-releases-state-of-legal-ai-2026-report/)."
+- N'AJOUTE PAS de section "Sources:" à la fin. Les URLs sont intégrées en ligne dans le texte.
 - "services juridiques" est INTERDIT. C'est toujours "produits juridiques".
-- Inclus AU MOINS UNE de ces URLs EXACTES (ce sont les SEULES sources autorisées):
+- Ne fais JAMAIS de fausse opposition: ne dis pas "alors que les autres / pendant que d'autres / contrairement aux autres" pour sous-entendre que Neolegal ne fait pas d'IA.
+- Les URLs autorisées sont:
   1. https://www.neolegal.ca
-  2. https://www.justice-quebec.ca/english-news/3033668_ai-is-moving-into-law-firms-and-canlii-just-opened-the-door-for-everyone
-  3. https://www.lawnext.com/2026/05/lawdroid-launches-free-open-source-claude-ai-plugin-for-civil-legal-aid.html
-  4. https://borealsignal.ca/stories/fixed-fee-justice-how-ai-is-reshaping-legal-billing-and-access-to-counsel
-  5. https://digitalitnews.com/litera-releases-state-of-legal-ai-2026-report/
-  6. https://www.giiresearch.com/report/tbrc1975880-legal-technology-global-market-report.html
-  7. https://www.thomsonreuters.com/en/press-releases/2026/may/thomson-reuters-and-anthropic-expand-partnership-to-connect-claude-with-cocounsel-legal
-  8. https://www.thomsonreuters.com/en/press-releases/2026/january/legal-industry-experiencing-tectonic-shift-technology-talent-and-demand-prompting-law-firms-to-evolve
+  2. https://www.lawnext.com/2026/05/lawdroid-launches-free-open-source-claude-ai-plugin-for-civil-legal-aid.html
+  3. https://borealsignal.ca/stories/fixed-fee-justice-how-ai-is-reshaping-legal-billing-and-access-to-counsel
+  4. https://digitalitnews.com/litera-releases-state-of-legal-ai-2026-report/
+  5. https://www.giiresearch.com/report/tbrc1975880-legal-technology-global-market-report.html
+  6. https://www.thomsonreuters.com/en/press-releases/2026/may/thomson-reuters-and-anthropic-expand-partnership-to-connect-claude-with-cocounsel-legal
+  7. https://www.thomsonreuters.com/en/press-releases/2026/january/legal-industry-experiencing-tectonic-shift-technology-talent-and-demand-prompting-law-firms-to-evolve
 - Termine par une question forte.
 
 PHRASES INTERDITES:
 "révolution de l'IA", "changer la donne", "à l'ère du digital", "le futur est maintenant",
 "game changer", "monde numérique", "nouvelle ère", "transformation sans précédent",
 "services juridiques" (toujours "produits juridiques"), "penser-vous" (toujours "pensez-vous").
+"alors que les autres", "pendant que d'autres", "contrairement aux autres" (fausse opposition IA).
 
 Retourne UNIQUEMENT le texte du post LinkedIn. Aucun titre, aucune introduction, aucune explication.
 """
@@ -399,7 +411,6 @@ Règles:
 - Ton personnel et direct.
 - Inclus au moins une URL exacte (parmi la liste autorisée):
   - https://www.neolegal.ca
-  - https://www.justice-quebec.ca/english-news/3033668_ai-is-moving-into-law-firms-and-canlii-just-opened-the-door-for-everyone
   - https://www.lawnext.com/2026/05/lawdroid-launches-free-open-source-claude-ai-plugin-for-civil-legal-aid.html
   - https://borealsignal.ca/stories/fixed-fee-justice-how-ai-is-reshaping-legal-billing-and-access-to-counsel
   - https://digitalitnews.com/litera-releases-state-of-legal-ai-2026-report/
@@ -433,8 +444,8 @@ Post à raccourcir:
         found_urls = set(re.findall(r"https?://\S+", post))
         if real_urls & found_urls:
             return post
-        source_lines = "\n\nSources:\n"
-        source_lines += "\n".join(f"- {title}: {url}" for title, url in SOURCE_REFERENCES[:2])
+        source_lines = "\n\nSource:\n"
+        source_lines += f"- {SOURCE_REFERENCES[0][0]}: {SOURCE_REFERENCES[0][1]}"
         return f"{post.rstrip()}{source_lines}"
 
     @staticmethod
@@ -443,6 +454,8 @@ Post à raccourcir:
         post = re.sub(r"\bpenser-vous\b", "pensez-vous", post, flags=re.IGNORECASE)
         post = re.sub(r"\bcroire-vous\b", "croyez-vous", post, flags=re.IGNORECASE)
         post = post.replace("\u2014", ":").replace("\u2013", "-")
+        # normalize "75 %" -> "75%"
+        post = re.sub(r"(\d)\s%", r"\1%", post)
         emoji_pattern = re.compile(
             "[\U0001F600-\U0001F64F"
             "\U0001F300-\U0001F5FF"
@@ -492,10 +505,40 @@ Post à raccourcir:
             "révolution de l'IA", "changer la donne", "à l'ère du digital",
             "le futur est maintenant", "game changer", "monde numérique",
             "nouvelle ère", "transformation sans précédent",
+            "alors que les autres", "pendant que d'autres",
+            "contrairement aux autres",
         ]
         for phrase in banned:
             if phrase.lower() in post.lower():
                 raise PostGenerationError(f"Phrase interdite détectée: '{phrase}'")
 
+        match_neolegal = re.findall(r"\bChez Neolegal\b", post)
+        if len(match_neolegal) > 3:
+            raise PostGenerationError(
+                f"'Chez Neolegal' répété {len(match_neolegal)} fois. Maximum 3."
+            )
+
+        competitor_names = ["canlii", "clio", "lexisnexis", "practical law", "westlaw"]
+        for comp in competitor_names:
+            if comp in post.lower():
+                raise PostGenerationError(f"Concurrent mentionné: '{comp}'. Interdit.")
+
         if re.search(r"\*\*.*?\*\*", post):
             raise PostGenerationError("Le post contient du gras (**texte**). Interdit.")
+
+        # catch invented percentages not in KNOWN_PERCENTAGES
+        found_pcts = set(re.findall(r"\b\d+(?:[.,]\d+)?%", post))
+        invented_pcts = found_pcts - KNOWN_PERCENTAGES
+        if invented_pcts:
+            raise PostGenerationError(
+                f"Statistique inventée détectée: {', '.join(sorted(invented_pcts))}. "
+                f"Seuls les chiffres réels des sources sont autorisés."
+            )
+
+        # catch invented fractions like "1/3", "1/2", "2/3"
+        found_fractions = set(re.findall(r"\b\d+/\d+\b", post))
+        if found_fractions:
+            raise PostGenerationError(
+                f"Fraction inventée détectée: {', '.join(sorted(found_fractions))}. "
+                f"Pas de fractions non sourcées."
+            )
