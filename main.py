@@ -18,7 +18,7 @@ from typing import Any
 import schedule
 
 from email_sender import EmailConfig, EmailSender
-from post_generator import OllamaConfig, PostGenerator
+from post_generator import OllamaConfig, PostGenerator, TopicTracker
 
 
 DEFAULT_CONFIG_PATH = Path("config.json")
@@ -41,7 +41,8 @@ class DailyLinkedInBot:
     def __init__(self, config: AppConfig, logger: logging.Logger) -> None:
         self.config = config
         self.logger = logger
-        self.generator = PostGenerator(config.ollama, config.posts_dir, logger)
+        topic_tracker = TopicTracker(config.posts_dir / "used_topics.json", logger)
+        self.generator = PostGenerator(config.ollama, config.posts_dir, logger, topic_tracker)
         self.email_sender = EmailSender(config.email, logger)
         self._shutdown_requested = False
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import re
 import time
@@ -59,6 +60,22 @@ SOURCE_REFERENCES = [
         "Thomson Reuters Institute: 2026 AI in Professional Services report takeaways for legal teams",
         "https://legal.thomsonreuters.com/blog/highlights-from-the-2026-ai-in-professional-services-report-and-what-it-means-for-legal-teams-tri/",
     ),
+]
+
+SOURCE_URLS = {url for _, url in SOURCE_REFERENCES}
+SOURCE_URLS_LIST = list(SOURCE_URLS)
+
+ANGLES = [
+    "Point de vue: les cabinets d'avocats qui adoptent le marketing digital gagnent des parts de marché. Donne un exemple concret vu chez Neolegal.",
+    "Point de vue: le pricing à forfait vs taux horaire — pourquoi les clients choisissent les produits juridiques décomposés. Observation terrain.",
+    "Point de vue: comment les avocats peuvent transformer leur pratique avec des leads qualifiés sans démarchage. Ce que ça change pour leur croissance.",
+    "Point de vue: l'accès à la justice passe par la simplicité — ce que j'observe chez les consommateurs de produits juridiques en ligne.",
+    "Point de vue: pourquoi les assureurs et grands employeurs ajoutent l'accès juridique aux avantages sociaux. Tendance de fond.",
+    "Point de vue: le legal marketing B2C vs B2B — deux mondes, une seule mission : rendre le droit accessible.",
+    "Point de vue: ce que la génération de documents automatisée change dans la relation avocat-client.",
+    "Point de vue: legaltech et confiance — comment les plateformes comme Neolegal construisent la crédibilité auprès du grand public.",
+    "Point de vue: l'essor des produits juridiques à prix fixe — une tendance qui force les cabinets traditionnels à se réinventer.",
+    "Point de vue: acquisition client en legaltech — pourquoi le bouche-à-oreille et la simplicité battent les gros budgets pub.",
 ]
 
 
@@ -126,6 +143,72 @@ class PostGenerationError(RuntimeError):
     """Raised when a post cannot be generated or validated."""
 
 
+class DuplicateTopicError(RuntimeError):
+    """Raised when generated post uses an already-used URL."""
+
+
+class TopicTracker:
+    """Persists used URLs/angles so we never repeat a topic."""
+
+    def __init__(self, path: str | Path, logger: logging.Logger | None = None) -> None:
+        self.path = Path(path)
+        self.logger = logger or logging.getLogger(__name__)
+        self._used_urls: set[str] = set()
+        self._used_angle_indices: set[int] = set()
+        self._load()
+
+    def _load(self) -> None:
+        if not self.path.exists():
+            return
+        try:
+            data = json.loads(self.path.read_text(encoding="utf-8"))
+            self._used_urls = set(data.get("used_urls", []))
+            self._used_angle_indices = set(data.get("used_angle_indices", []))
+        except (json.JSONDecodeError, KeyError):
+            self.logger.warning("Failed to load used_topics.json, starting fresh")
+
+    def save(self) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        data = {
+            "used_urls": sorted(self._used_urls),
+            "used_angle_indices": sorted(self._used_angle_indices),
+        }
+        self.path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    def record(self, post: str) -> None:
+        found_urls = set(re.findall(r"https?://\S+", post))
+        for url in found_urls:
+            if url in SOURCE_URLS:
+                self._used_urls.add(url)
+        self.save()
+
+    def is_url_used(self, url: str) -> bool:
+        return url in self._used_urls
+
+    def available_sources(self) -> list[tuple[str, str]]:
+        return [(t, u) for t, u in SOURCE_REFERENCES if u not in self._used_urls]
+
+    def available_urls(self) -> list[str]:
+        return [u for u in SOURCE_URLS_LIST if u not in self._used_urls]
+
+    def fresh_angle(self) -> str:
+        unused = [i for i in range(len(ANGLES)) if i not in self._used_angle_indices]
+        if not unused:
+            self._used_angle_indices.clear()
+            unused = list(range(len(ANGLES)))
+        idx = unused[0]
+        self._used_angle_indices.add(idx)
+        self.save()
+        return ANGLES[idx]
+
+    def available_angle_count(self) -> int:
+        unused = [i for i in range(len(ANGLES)) if i not in self._used_angle_indices]
+        return len(unused)
+
+    def total_angles(self) -> int:
+        return len(ANGLES)
+
+
 class PostGenerator:
     """Generates and persists LinkedIn posts."""
 
@@ -134,23 +217,36 @@ class PostGenerator:
         ollama_config: OllamaConfig,
         posts_dir: str | Path = "posts",
         logger: logging.Logger | None = None,
+        topic_tracker: TopicTracker | None = None,
     ) -> None:
         self.config = ollama_config
         self.posts_dir = Path(posts_dir)
         self.logger = logger or logging.getLogger(__name__)
         self.posts_dir.mkdir(parents=True, exist_ok=True)
+        self.topic_tracker = topic_tracker or TopicTracker(self.posts_dir / "used_topics.json", logger)
 
     def generate_post(self, post_date: date | None = None, angle_instruction: str | None = None) -> str:
-        """Generate one LinkedIn post and validate basic quality constraints."""
+        """Generate a LinkedIn post, rotating topics to avoid duplicates."""
         post_date = post_date or date.today()
-        prompt = USER_PROMPT_TEMPLATE.format(
-            today=post_date.isoformat(),
-            angle_instruction=angle_instruction or "Point de vue personnel et stratégique sur une actualité legal tech récente.",
+
+        angle = angle_instruction or self.topic_tracker.fresh_angle()
+        used_count = self.topic_tracker.total_angles() - self.topic_tracker.available_angle_count()
+        self.logger.info(
+            "=== TOPIC %s/%s: %s",
+            used_count + 1,
+            self.topic_tracker.total_angles(),
+            angle.split(":")[0].replace("Point de vue", "").strip() or angle[:60],
         )
 
-        last_error: Exception | None = None
-        for attempt in range(1, self.config.max_retries + 1):
+        forbidden_urls = self.topic_tracker.available_urls()
+        used_urls = self.topic_tracker._used_urls.copy()
+
+        for attempt in range(1, self.config.max_retries + 5):
             try:
+                prompt = USER_PROMPT_TEMPLATE.format(
+                    today=post_date.isoformat(),
+                    angle_instruction=angle,
+                )
                 self.logger.info("Generating LinkedIn post with Ollama model %s", self.config.model)
                 post = self._call_ollama(prompt)
                 cleaned = self._clean_response(post)
@@ -169,29 +265,51 @@ class PostGenerator:
 
                 cleaned = self._ensure_source_url(cleaned)
                 self._validate_post(cleaned)
+
+                urls_in_post = set(re.findall(r"https?://\S+", cleaned))
+                used_source_urls = urls_in_post & SOURCE_URLS
+                repeated = used_source_urls & used_urls
+
+                if repeated:
+                    self.logger.warning(
+                        "⚠️  DUPLICATE URL DETECTED: %s. Rotating to new topic...",
+                        repeated,
+                    )
+                    angle = self.topic_tracker.fresh_angle()
+                    used_urls = self.topic_tracker._used_urls.copy()
+                    continue
+
+                self.topic_tracker.record(cleaned)
+                self.logger.info(
+                    "✅ POST GENERATED — URL: %s",
+                    ", ".join(sorted(used_source_urls)) if used_source_urls else "neolegal.ca",
+                )
                 return cleaned
-            except Exception as exc:  # noqa: BLE001 - surfaced with context after retries.
-                last_error = exc
+
+            except DuplicateTopicError:
+                angle = self.topic_tracker.fresh_angle()
+                used_urls = self.topic_tracker._used_urls.copy()
+                self.logger.info("🔄 Switching to new angle: %s", angle[:80])
+                continue
+
+            except Exception as exc:
                 self.logger.warning(
                     "Post generation attempt %s/%s failed: %s",
                     attempt,
-                    self.config.max_retries,
+                    self.config.max_retries + 5,
                     exc,
                 )
-                if attempt < self.config.max_retries:
+                if attempt < self.config.max_retries + 5:
                     time.sleep(self.config.retry_delay_seconds)
+                    angle = self.topic_tracker.fresh_angle()
+                    used_urls = self.topic_tracker._used_urls.copy()
 
-        raise PostGenerationError(f"Failed to generate a valid post: {last_error}") from last_error
+        raise PostGenerationError("Failed to generate a fresh post after exhausting all retries and topics")
 
     def generate_post_choices(self, post_date: date | None = None, count: int = 3) -> list[str]:
         """Generate several distinct post options for a single date."""
         post_date = post_date or date.today()
-        angles = [
-            "Option 1: prise de position personnelle sur une actualité GenAI/legal tech récente.",
-            "Option 2: framework pratique pour transformer une news IA/legal tech en confiance client.",
-            "Option 3: angle data privacy/AI governance avec une opinion plus contrarienne.",
-        ]
-        return [self.generate_post(post_date, angles[index % len(angles)]) for index in range(count)]
+        return [self.generate_post(post_date, self.topic_tracker.fresh_angle()) for _ in range(count)]
 
     def save_post(
         self,
@@ -209,7 +327,7 @@ class PostGenerator:
             path = self.posts_dir / f"{post_date.isoformat()}-linkedin-post{suffix}-{timestamp}.md"
 
         path.write_text(self._markdown_document(post, post_date), encoding="utf-8")
-        self.logger.info("Saved LinkedIn post to %s", path)
+        self.logger.info("💾 Saved LinkedIn post to %s", path)
         return path
 
     def latest_post_path(self) -> Path | None:
@@ -248,26 +366,17 @@ class PostGenerator:
 
     @staticmethod
     def _extract_answer_from_thinking(thinking: str) -> str:
-        """Extract the final answer from a thinking field of a reasoning model.
-
-        Reasoning models output their chain of thought in the thinking field,
-        then the final answer. This method tries to extract just the answer.
-        """
         candidates = []
-
         lines = thinking.split("\n")
         half = len(lines) // 2
         candidates.append("\n".join(lines[half:]))
-
         paragraphs = thinking.split("\n\n")
         if len(paragraphs) > 2:
             candidates.append("\n\n".join(paragraphs[1:]))
         if len(paragraphs) > 4:
             candidates.append("\n\n".join(paragraphs[len(paragraphs) // 2:]))
-
         last_third_start = len(thinking) * 2 // 3
         candidates.append(thinking[last_third_start:])
-
         candidates.sort(key=len)
         return candidates[0]
 
@@ -320,10 +429,8 @@ Post à raccourcir:
     def _ensure_source_url(post: str) -> str:
         real_urls = {url for _, url in SOURCE_REFERENCES}
         found_urls = set(re.findall(r"https?://\S+", post))
-
         if real_urls & found_urls:
             return post
-
         source_lines = "\n\nSources:\n"
         source_lines += "\n".join(f"- {title}: {url}" for title, url in SOURCE_REFERENCES[:2])
         return f"{post.rstrip()}{source_lines}"
@@ -339,7 +446,7 @@ Post à raccourcir:
         cleaned = re.sub(r"(?i)^voici le post linkedin final\s*:?\s*", "", cleaned).strip()
         cleaned = re.sub(r"(?i)^voici le post\s*:?\s*", "", cleaned).strip()
         cleaned = re.sub(r"(?i)^option \d+[:\s]*", "", cleaned).strip()
-        cleaned = re.sub(r"\*\*(.*?)\*\*", r"\1", cleaned)  # strip bold markers
+        cleaned = re.sub(r"\*\*(.*?)\*\*", r"\1", cleaned)
         return cleaned.strip()
 
     @staticmethod
