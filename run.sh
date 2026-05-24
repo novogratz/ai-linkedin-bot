@@ -4,6 +4,14 @@ LOG_DIR="logs"
 mkdir -p "$LOG_DIR"
 
 TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
+
+# Kill any lingering previous instance
+PREV_PID=$(pgrep -f "python main.py" 2>/dev/null)
+if [ -n "$PREV_PID" ]; then
+  kill -KILL "$PREV_PID" 2>/dev/null
+  sleep 1
+fi
+
 echo "═══════════════════════════════════════════════════" | tee -a "$LOG_DIR/run.log"
 echo "  Neolegal LinkedIn Bot — $TIMESTAMP" | tee -a "$LOG_DIR/run.log"
 echo "═══════════════════════════════════════════════════" | tee -a "$LOG_DIR/run.log"

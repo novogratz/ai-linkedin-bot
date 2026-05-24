@@ -88,12 +88,13 @@ class DailyLinkedInBot:
     def run_scheduler(self) -> None:
         """Run immediately, then daily at configured time."""
         self.logger.info(
-            "Scheduler started. Daily run time: %s %s. Running first post now.",
+            "Scheduler started (PID %s). Daily run time: %s %s. Running first post now.",
+            os.getpid(),
             self.config.daily_time,
             self.config.timezone,
         )
         self.run_once()
-        self._shutdown_requested = False  # reset in case signal arrived during first run
+        self._shutdown_requested = False
         schedule.every().day.at(self.config.daily_time, self.config.timezone).do(self.run_once)
 
         while not self._shutdown_requested:
@@ -102,9 +103,12 @@ class DailyLinkedInBot:
 
         self.logger.info("Scheduler stopped")
 
-    def request_shutdown(self, signum: int, _frame: FrameType | None) -> None:
-        self.logger.info("Received signal %s. Shutting down gracefully.", signum)
-        self._shutdown_requested = True
+    def request_shutdown(self, signum: int, frame: FrameType | None) -> None:
+        if signum == signal.SIGINT:
+            self._shutdown_requested = True
+            self.logger.info("SIGINT received. Shutting down gracefully.")
+        else:
+            self.logger.info("Received signal %s. Ignoring (use Ctrl+C / SIGINT to stop).", signum)
 
 
 def load_config(path: Path) -> AppConfig:
