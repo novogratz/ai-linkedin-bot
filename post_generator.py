@@ -535,10 +535,11 @@ Post à raccourcir:
                 f"Seuls les chiffres réels des sources sont autorisés."
             )
 
-        # catch invented fractions like "1/3", "1/2", "2/3"
+        # catch invented fractions like "1/3", "1/2", "2/3" (but not dates "2026/05")
         found_fractions = set(re.findall(r"\b\d+/\d+\b", post))
-        if found_fractions:
+        real_fractions = {f for f in found_fractions if not re.match(r"\d{4}/\d{1,2}$", f)}
+        if real_fractions:
             raise PostGenerationError(
-                f"Fraction inventée détectée: {', '.join(sorted(found_fractions))}. "
+                f"Fraction inventée détectée: {', '.join(sorted(real_fractions))}. "
                 f"Pas de fractions non sourcées."
             )
