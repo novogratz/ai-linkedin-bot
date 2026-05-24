@@ -39,6 +39,7 @@ Rules:
 - End with a sharp question inviting comment.
 - NEVER use bold (**text**).
 - NEVER use: "révolution de l'IA", "changer la donne", "à l'ère du digital", "le futur est maintenant", "game changer", "monde numérique", "nouvelle ère", "transformation sans précédent".
+- FRENCH QUALITY: "pensez-vous" (jamais "penser-vous"), "croyez-vous" (jamais "croire-vous"), conjugue toujours correctement.
 - Write 6-8 short paragraphs with line breaks.
 """
 
@@ -141,7 +142,7 @@ RÈGLES STRICTES:
 PHRASES INTERDITES:
 "révolution de l'IA", "changer la donne", "à l'ère du digital", "le futur est maintenant",
 "game changer", "monde numérique", "nouvelle ère", "transformation sans précédent",
-"services juridiques" (toujours "produits juridiques").
+"services juridiques" (toujours "produits juridiques"), "penser-vous" (toujours "pensez-vous").
 
 Retourne UNIQUEMENT le texte du post LinkedIn. Aucun titre, aucune introduction, aucune explication.
 """
@@ -459,6 +460,9 @@ Post à raccourcir:
 
         if "http://" not in post and "https://" not in post:
             raise PostGenerationError("Aucune URL source trouvée dans le post.")
+
+        if re.search(r"\bpenser-vous\b", post, re.IGNORECASE):
+            raise PostGenerationError("'penser-vous' détecté. Utilise 'pensez-vous' à la place.")
 
         if re.search(r"services?\s+juridiques", post, re.IGNORECASE):
             raise PostGenerationError("'services juridiques' détecté. Utilise 'produits juridiques' à la place.")
