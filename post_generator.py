@@ -17,11 +17,11 @@ import requests
 SYSTEM_PROMPT = """
 You are Elizabeth K. Flannery, Director of Marketing at Neolegal (https://www.neolegal.ca), Canada's first digital legal platform. You write LinkedIn posts in your own voice.
 
-CRITICAL RULE — Entire post MUST be in French. Non-negotiable. Only source titles/URLs may be English.
+CRITICAL RULE : Entire post MUST be in French. Non-negotiable. Only source titles/URLs may be English.
 
 WHAT NEOLEGAL DOES (tell the real story):
-- A web platform (B2C) where consumers get legal products — fixed-fee, no hourly rates. Top products: civil, penal, family, business law.
-- A lawyer collaboration network — lawyers receive qualified leads without prospecting, generate documents via NeoDoc, and we handle all admin.
+- A web platform (B2C) where consumers get legal products : fixed-fee, no hourly rates. Top products: civil, penal, family, business law.
+- A lawyer collaboration network : lawyers receive qualified leads without prospecting, generate documents via NeoDoc, and we handle all admin.
 - Suite Neolegal Affaire: NeoForm (info collection), NeoDoc (automated document generation), NeoDesk (practice management).
 - Avocat dans la Poche: legal access as an employee benefit for insurers and large employers.
 - Mission: increase access to justice by unbundling legal products.
@@ -30,9 +30,9 @@ Focus areas: legaltech marketing, access to justice, legal product innovation, h
 
 Rules:
 - You are a MARKETER, not a CTO, not a privacy officer. Stay in your lane.
-- Bring a FRESH TAKE — say something that adds to the conversation, not rehash what everyone else says.
+- Bring a FRESH TAKE : say something that adds to the conversation, not rehash what everyone else says.
 - Always position Neolegal naturally as the context ("chez Neolegal, on voit que...").
-- Use "produits juridiques" — never "services juridiques".
+- Use "produits juridiques" : never "services juridiques".
 - Hook hard in the first line. No fluff.
 - USE REAL NUMBERS from the sources to make it impactful. Each source has real data below.
 - Reference 1-2 sources using EXACT URLs provided. Do not invent URLs.
@@ -47,35 +47,35 @@ Rules:
 
 SOURCE_REFERENCES = [
     (
-        "Neolegal — produits juridiques en ligne, accès à la justice",
+        "Neolegal : produits juridiques en ligne, accès à la justice",
         "https://www.neolegal.ca",
     ),
     (
-        "CanLII Search+ — moteur de recherche juridique IA gratuit accessible à tous les Canadiens (fév. 2026)",
+        "CanLII Search+ : moteur de recherche juridique IA gratuit accessible à tous les Canadiens (fév. 2026)",
         "https://www.justice-quebec.ca/english-news/3033668_ai-is-moving-into-law-firms-and-canlii-just-opened-the-door-for-everyone",
     ),
     (
-        "LawDroid Legal Aid Plugin — plugin open-source gratuit pour l'aide juridique. 92% des Américains à faible revenu sans aide juridique suffisante (LSC Justice Gap). (mai 2026)",
+        "LawDroid Legal Aid Plugin : plugin open-source gratuit pour l'aide juridique. 92% des Américains à faible revenu sans aide juridique suffisante (LSC Justice Gap). (mai 2026)",
         "https://www.lawnext.com/2026/05/lawdroid-launches-free-open-source-claude-ai-plugin-for-civil-legal-aid.html",
     ),
     (
-        "Fixed-Fee Justice: Angrove Law passe au forfait avec l'IA — prix fixes de 2000-3000$ vs 5000$+ au taux horaire. (avr. 2026)",
+        "Fixed-Fee Justice: Angrove Law passe au forfait avec l'IA : prix fixes de 2000-3000$ vs 5000$+ au taux horaire. (avr. 2026)",
         "https://borealsignal.ca/stories/fixed-fee-justice-how-ai-is-reshaping-legal-billing-and-access-to-counsel",
     ),
     (
-        "Litera State of Legal AI 2026 — 85% des cabinets subissent la pression client sur l'IA, 51% des clients ont influencé un investissement IA. Seulement 15% des décisions IA sont encore internes.",
+        "Litera State of Legal AI 2026 : 85% des cabinets subissent la pression client sur l'IA, 51% des clients ont influencé un investissement IA. Seulement 15% des décisions IA sont encore internes.",
         "https://digitalitnews.com/litera-releases-state-of-legal-ai-2026-report/",
     ),
     (
-        "Legal Technology Global Market Report 2026 — marché de $36.01B en 2026, croissance 9.2% CAGR, prévu à $51.21B en 2030.",
+        "Legal Technology Global Market Report 2026 : marché de $36.01B en 2026, croissance 9.2% CAGR, prévu à $51.21B en 2030.",
         "https://www.giiresearch.com/report/tbrc1975880-legal-technology-global-market-report.html",
     ),
     (
-        "Thomson Reuters + Anthropic — expansion du partenariat Claude & CoCounsel Legal (mai 2026)",
+        "Thomson Reuters + Anthropic : expansion du partenariat Claude & CoCounsel Legal (mai 2026)",
         "https://www.thomsonreuters.com/en/press-releases/2026/may/thomson-reuters-and-anthropic-expand-partnership-to-connect-claude-with-cocounsel-legal",
     ),
     (
-        "2026 Report on the State of the US Legal Market — Thomson Reuters + Georgetown Law. L'industrie juridique américaine: $411B, 165,000+ établissements, 1.09M employés.",
+        "2026 Report on the State of the US Legal Market : Thomson Reuters + Georgetown Law. L'industrie juridique américaine: $411B, 165,000+ établissements, 1.09M employés.",
         "https://www.thomsonreuters.com/en/press-releases/2026/january/legal-industry-experiencing-tectonic-shift-technology-talent-and-demand-prompting-law-firms-to-evolve",
     ),
 ]
@@ -85,15 +85,15 @@ SOURCE_URLS_LIST = list(SOURCE_URLS)
 
 ANGLES = [
     "Point de vue: les cabinets d'avocats qui adoptent le marketing digital gagnent des parts de marché. Donne un exemple concret vu chez Neolegal.",
-    "Point de vue: le pricing à forfait vs taux horaire — pourquoi les clients choisissent les produits juridiques décomposés. Observation terrain.",
+    "Point de vue: le pricing à forfait vs taux horaire : pourquoi les clients choisissent les produits juridiques décomposés. Observation terrain.",
     "Point de vue: comment les avocats peuvent transformer leur pratique avec des leads qualifiés sans démarchage. Ce que ça change pour leur croissance.",
-    "Point de vue: l'accès à la justice passe par la simplicité — ce que j'observe chez les consommateurs de produits juridiques en ligne.",
+    "Point de vue: l'accès à la justice passe par la simplicité : ce que j'observe chez les consommateurs de produits juridiques en ligne.",
     "Point de vue: pourquoi les assureurs et grands employeurs ajoutent l'accès juridique aux avantages sociaux. Tendance de fond.",
-    "Point de vue: le legal marketing B2C vs B2B — deux mondes, une seule mission : rendre le droit accessible.",
+    "Point de vue: le legal marketing B2C vs B2B : deux mondes, une seule mission : rendre le droit accessible.",
     "Point de vue: ce que la génération de documents automatisée change dans la relation avocat-client.",
-    "Point de vue: legaltech et confiance — comment les plateformes comme Neolegal construisent la crédibilité auprès du grand public.",
-    "Point de vue: l'essor des produits juridiques à prix fixe — une tendance qui force les cabinets traditionnels à se réinventer.",
-    "Point de vue: acquisition client en legaltech — pourquoi le bouche-à-oreille et la simplicité battent les gros budgets pub.",
+    "Point de vue: legaltech et confiance : comment les plateformes comme Neolegal construisent la crédibilité auprès du grand public.",
+    "Point de vue: l'essor des produits juridiques à prix fixe : une tendance qui force les cabinets traditionnels à se réinventer.",
+    "Point de vue: acquisition client en legaltech : pourquoi le bouche-à-oreille et la simplicité battent les gros budgets pub.",
 ]
 
 
@@ -114,7 +114,7 @@ CE QUE FAIT NEOLEGAL (sois précise):
 TON ET POSITIONNEMENT:
 - Directrice marketing, pas une CTO. Jargon technique interdit.
 - Apporte UN ANGLE NOUVEAU. Si c'est déjà dit 100 fois, trouve autre chose.
-- "produits juridiques" toujours — JAMAIS "services juridiques".
+- "produits juridiques" toujours : JAMAIS "services juridiques".
 - Mensione Neolegal comme contexte de ton insight: "chez Neolegal, on voit que...", "chez Neolegal, on a constaté...".
 - Observation concrète du terrain, pas de prédiction vague.
 - Utilise des CHIFFRES RÉELS des sources pour frapper fort. Une donnée concrète rend un post 10x plus partageable.
@@ -284,7 +284,7 @@ class PostGenerator:
 
                 self.topic_tracker.record(cleaned)
                 self.logger.info(
-                    "POST GENERATED — URL: %s",
+                    "POST GENERATED : URL: %s",
                     ", ".join(sorted(set(re.findall(r"https?://\S+", cleaned)) & SOURCE_URLS)) or "neolegal.ca",
                 )
                 return cleaned
@@ -389,7 +389,7 @@ Conserve l'idée, le hook, les sources, le CTA, mais ajoute:
 - plus de rythme et de sauts de ligne,
 
 Règles:
-- "produits juridiques" — pas "services juridiques".
+- "produits juridiques" : pas "services juridiques".
 - Pas de hashtags.
 - Pas de gras (**).
 - Pas de statistiques inventées (X%, "selon une étude").
@@ -417,7 +417,7 @@ Raccourcis ce post LinkedIn en français à 1800-2500 caractères maximum.
 Conserve le hook, l'idée principale, la source URL, le CTA.
 Supprime les répétitions, le filler, les phrases trop longues.
 Garde le ton personnel et direct.
-Pas de hashtags. Pas de statistiques inventées (X%). "produits juridiques" — pas "services juridiques".
+Pas de hashtags. Pas de statistiques inventées (X%). "produits juridiques" : pas "services juridiques".
 Retourne uniquement le texte raccourci.
 
 Post à raccourcir:
