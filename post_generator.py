@@ -36,6 +36,7 @@ Rules:
 - Hook hard in the first line. No fluff.
 - Use 6-9 emojis scattered naturally.
 - Reference 1-2 sources using EXACT URLs provided. Do not invent URLs.
+- NEVER invent statistics, percentages, or data points. If you write "X% des cabinets" or "selon une étude", you MUST have seen that exact number in the source. If you're not sure, don't include it.
 - End with a sharp question inviting comment.
 - NEVER use bold (**text**).
 - NEVER use: "révolution de l'IA", "changer la donne", "à l'ère du digital", "le futur est maintenant", "game changer", "monde numérique", "nouvelle ère", "transformation sans précédent".
@@ -110,6 +111,7 @@ RÈGLES STRICTES:
 - Pas de gras (**).
 - 6-9 émojis répartis.
 - N'invente JAMAIS un nom de source ou de rapport. Utilise UNIQUEMENT les URLs fournies ci-dessous. Ne les modifie pas.
+- N'invente JAMAIS de statistiques, pourcentages, ou données chiffrées. Si tu écris "75% des clients" ou "selon une étude", tu DOIS avoir vu ce chiffre exact dans la source. Dans le doute, n'en mets pas.
 - "services juridiques" est INTERDIT. C'est toujours "produits juridiques". Si tu écris "services juridiques", le post est rejeté.
 - Inclus AU MOINS UNE de ces URLs EXACTES:
   1. https://www.neolegal.ca
@@ -397,6 +399,7 @@ Règles:
 - "produits juridiques" — pas "services juridiques".
 - Pas de hashtags.
 - Pas de gras (**).
+- Pas de statistiques inventées (X%, "selon une étude").
 - Sortie finale entre 1800 et 2500 caractères.
 - Ton personnel et direct.
 - Inclus au moins une URL exacte:
@@ -417,7 +420,7 @@ Raccourcis ce post LinkedIn en français à 1800-2500 caractères maximum.
 Conserve le hook, l'idée principale, la source URL, le CTA.
 Supprime les répétitions, le filler, les phrases trop longues.
 Garde le ton personnel et direct. Garde 6-9 émojis.
-Pas de hashtags. "produits juridiques" — pas "services juridiques".
+Pas de hashtags. Pas de statistiques inventées (X%). "produits juridiques" — pas "services juridiques".
 Retourne uniquement le texte raccourci.
 
 Post à raccourcir:
@@ -462,6 +465,9 @@ Post à raccourcir:
 
         if "http://" not in post and "https://" not in post:
             raise PostGenerationError("Aucune URL source trouvée dans le post.")
+
+        if re.search(r"\d+%", post):
+            raise PostGenerationError("Statistiques inventées détectées (ex: X%). Interdit.")
 
         if re.search(r"services?\s+juridiques", post, re.IGNORECASE):
             raise PostGenerationError("'services juridiques' détecté. Utilise 'produits juridiques' à la place.")
