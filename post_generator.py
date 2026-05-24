@@ -478,5 +478,8 @@ Post à raccourcir:
             if phrase.lower() in post.lower():
                 raise PostGenerationError(f"Phrase interdite détectée: '{phrase}'")
 
+        if "\u2014" in post or "\u2013" in post:
+            raise PostGenerationError("Tiret cadratin (—) ou demi-cadratin (–) détecté. Interdit.")
+
         if re.search(r"\*\*.*?\*\*", post):
             raise PostGenerationError("Le post contient du gras (**texte**). Interdit.")
