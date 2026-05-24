@@ -8,12 +8,7 @@ echo "════════════════════════�
 echo "  🚀 Neolegal LinkedIn Bot — $TIMESTAMP" | tee -a "$LOG_DIR/run.log"
 echo "═══════════════════════════════════════════════════" | tee -a "$LOG_DIR/run.log"
 
-.venv/bin/python main.py >> "$LOG_DIR/run.log" 2>&1 &
-
-PID=$!
-echo "  PID: $PID" | tee -a "$LOG_DIR/run.log"
-
-wait $PID
+.venv/bin/python main.py 2>&1 | tee -a "$LOG_DIR/run.log"
 EXIT_CODE=$?
 
 TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
