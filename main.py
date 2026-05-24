@@ -88,7 +88,7 @@ class DailyLinkedInBot:
     def run_scheduler(self) -> None:
         """Run immediately, then daily at configured time."""
         self.logger.info(
-            "Scheduler started (PID %s). Daily run time: %s %s. Running first post now.",
+            "Scheduler started (PID %s). Daily run time: %s %s. Running first post now. Press Ctrl+C to stop.",
             os.getpid(),
             self.config.daily_time,
             self.config.timezone,
@@ -98,7 +98,10 @@ class DailyLinkedInBot:
         schedule.every().day.at(self.config.daily_time, self.config.timezone).do(self.run_once)
 
         while not self._shutdown_requested:
-            schedule.run_pending()
+            try:
+                schedule.run_pending()
+            except Exception:
+                self.logger.exception("Scheduler error, continuing...")
             time.sleep(1)
 
         self.logger.info("Scheduler stopped")
