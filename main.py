@@ -93,6 +93,7 @@ class DailyLinkedInBot:
             self.config.timezone,
         )
         self.run_once()
+        self._shutdown_requested = False  # reset in case signal arrived during first run
         schedule.every().day.at(self.config.daily_time, self.config.timezone).do(self.run_once)
 
         while not self._shutdown_requested:
