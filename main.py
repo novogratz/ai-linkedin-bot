@@ -10,12 +10,12 @@ import signal
 import sys
 import time
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from types import FrameType
 from typing import Any
 
-import schedule
+import pytz
 
 from email_sender import EmailConfig, EmailSender
 from post_generator import OllamaConfig, PostGenerator, TopicTracker
@@ -87,6 +87,7 @@ class DailyLinkedInBot:
 
     def run_scheduler(self) -> None:
         """Run immediately, then daily at configured time."""
+        tz = pytz.timezone(self.config.timezone)
         self.logger.info(
             "Scheduler started (PID %s). Daily run time: %s %s. Running first post now. Press Ctrl+C to stop.",
             os.getpid(),
@@ -95,14 +96,27 @@ class DailyLinkedInBot:
         )
         self.run_once()
         self._shutdown_requested = False
-        schedule.every().day.at(self.config.daily_time, self.config.timezone).do(self.run_once)
 
+        hour, minute = self.config.daily_time.split(":")
         while not self._shutdown_requested:
-            try:
-                schedule.run_pending()
-                time.sleep(1)
-            except Exception:
-                self.logger.exception("Scheduler error, continuing...")
+            now = datetime.now(tz)
+            target = now.replace(hour=int(hour), minute=int(minute), second=0, microsecond=0)
+            if now >= target:
+                target += timedelta(days=1)
+            sleep_seconds = (target - now).total_seconds()
+
+            self.logger.info(
+                "Next run at %s (%d seconds). Sleeping...",
+                target.strftime("%H:%M %Z"),
+                int(sleep_seconds),
+            )
+
+            while sleep_seconds > 0 and not self._shutdown_requested:
+                time.sleep(min(sleep_seconds, 60))
+                sleep_seconds -= 60
+
+            if not self._shutdown_requested:
+                self.run_once()
 
         self.logger.info("Scheduler stopped")
 
