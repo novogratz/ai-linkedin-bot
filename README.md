@@ -1,17 +1,16 @@
 # AI LinkedIn Bot
 
-Daily LinkedIn post generator for Elizabeth K. Flannery, focused on Legal NeoTech Marketing.
+Daily LinkedIn post generator for Elizabeth K. Flannery, Director of Marketing at [Neolegal](https://www.neolegal.ca).
 
-The bot uses a local Ollama model to generate three French LinkedIn post options every morning, saves each option as Markdown, and emails the three choices in one formatted HTML email.
+Uses a local Ollama model to generate one French LinkedIn post every morning, saves it as Markdown, and emails it in formatted HTML.
 
 ## What It Does
 
-- Generates 3 LinkedIn post options per run.
-- Writes posts in French with a personal, executive tone.
-- Uses recent legal tech, AI governance, privacy, and GenAI source context.
-- Sends one daily email at 6:00 AM America/Toronto.
-- Saves generated drafts in `posts/`.
-- Logs to console and `logs/daily_linkedin_bot.log`.
+- Generates **1 post** per run (marketing voice, promotes Neolegal naturally).
+- Writes posts in French — personal, direct, adds something new to the conversation.
+- Uses "produits juridiques" (never "services juridiques").
+- No hashtags. 6-9 emojis. 1800-2500 characters.
+- Saves drafts in `posts/` and logs to `logs/`.
 - Keeps credentials out of git via `.env`.
 
 ## Requirements
@@ -20,14 +19,14 @@ The bot uses a local Ollama model to generate three French LinkedIn post options
 - Ollama running locally on port `11434`
 - Gmail app password or another SMTP provider
 
-Install Python dependencies:
+Install dependencies:
 
 ```bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 ```
 
-Start Ollama and make sure the configured model exists:
+Start Ollama and pull the model:
 
 ```bash
 ollama serve
@@ -35,8 +34,6 @@ ollama pull llama3.1
 ```
 
 ## Configuration
-
-Create local config and env files:
 
 ```bash
 cp config.example.json config.json
@@ -51,41 +48,45 @@ SMTP_PASSWORD=your-google-app-password
 SMTP_FROM_EMAIL=your-gmail-address@gmail.com
 ```
 
-`config.json` is intentionally ignored by git. Use `config.example.json` as the safe committed template.
-
 ## Usage
 
-Generate and email today's three options:
+Run the scheduler (fires one post immediately, then daily at 6 AM):
 
 ```bash
-.venv/bin/python main.py --today
+./run.sh
 ```
 
-Generate seven days of drafts without emailing:
+Or run with logging:
 
 ```bash
-.venv/bin/python main.py --week
+./run.sh 2>&1 | tee -a logs/run.log
 ```
 
-Regenerate the latest saved post date and email three new options:
+Background it:
 
 ```bash
-.venv/bin/python main.py --regenerate
+nohup ./run.sh > /dev/null 2>&1 &
 ```
 
-Run the daily scheduler:
+**Other commands:**
 
 ```bash
-.venv/bin/python main.py
+.venv/bin/python main.py --today          # Generate and email one post now
+.venv/bin/python main.py --week           # Generate 7 days of drafts without emailing
+.venv/bin/python main.py --regenerate     # Regenerate the most recent post
 ```
 
-The scheduler runs every day at `06:00` in `America/Toronto`.
+### launchd (macOS auto-start at 6 AM)
+
+```bash
+cp com.neolegal.daily-linkedin-bot.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.neolegal.daily-linkedin-bot.plist
+```
 
 ## Safety Notes
 
 - Do not commit `.env`, `config.json`, `posts/`, or `logs/`.
-- Do not paste Gmail app passwords into issues, commits, PRs, or chat.
-- The default workflow sends real email when using `--today`, `--regenerate`, or scheduler mode.
+- The default workflow sends real email with `--today`, `--regenerate`, or scheduler mode.
 - Use `--week` when you only want drafts saved locally.
 
 ## Project Structure
@@ -94,6 +95,7 @@ The scheduler runs every day at `06:00` in `America/Toronto`.
 main.py              CLI, scheduler, config/env loading
 post_generator.py    Ollama prompting, validation, Markdown saving
 email_sender.py      SMTP and HTML email delivery
+run.sh               Convenience wrapper with logging
 config.example.json  Safe config template
 .env.example         Safe env template
 requirements.txt     Python dependencies
