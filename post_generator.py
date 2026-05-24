@@ -281,6 +281,7 @@ class PostGenerator:
                     shrink_count += 1
 
                 cleaned = self._ensure_source_url(cleaned)
+                cleaned = self._auto_fix(cleaned)
                 self._validate_post(cleaned)
 
                 self.topic_tracker.record(cleaned)
@@ -437,6 +438,29 @@ Post à raccourcir:
         return f"{post.rstrip()}{source_lines}"
 
     @staticmethod
+    def _auto_fix(post: str) -> str:
+        post = re.sub(r"services?\s+juridiques", "produits juridiques", post, flags=re.IGNORECASE)
+        post = re.sub(r"\bpenser-vous\b", "pensez-vous", post, flags=re.IGNORECASE)
+        post = re.sub(r"\bcroire-vous\b", "croyez-vous", post, flags=re.IGNORECASE)
+        post = post.replace("\u2014", ":").replace("\u2013", "-")
+        emoji_pattern = re.compile(
+            "[\U0001F600-\U0001F64F"
+            "\U0001F300-\U0001F5FF"
+            "\U0001F680-\U0001F6FF"
+            "\U0001F1E0-\U0001F1FF"
+            "\U00002702-\U000027B0"
+            "\U000024C2-\U0001F251"
+            "\U0001F900-\U0001F9FF"
+            "\U0001FA00-\U0001FA6F"
+            "\U0001FA70-\U0001FAFF"
+            "\U00002600-\U000026FF"
+            "\U0000FE00-\U0000FE0F]+",
+            flags=re.UNICODE,
+        )
+        post = emoji_pattern.sub("", post)
+        return post
+
+    @staticmethod
     def _clean_response(text: str) -> str:
         cleaned = text.strip()
         cleaned = re.sub(r"^```(?:markdown|text)?\s*", "", cleaned, flags=re.IGNORECASE)
@@ -464,12 +488,6 @@ Post à raccourcir:
         if "http://" not in post and "https://" not in post:
             raise PostGenerationError("Aucune URL source trouvée dans le post.")
 
-        if re.search(r"\bpenser-vous\b", post, re.IGNORECASE):
-            raise PostGenerationError("'penser-vous' détecté. Utilise 'pensez-vous' à la place.")
-
-        if re.search(r"services?\s+juridiques", post, re.IGNORECASE):
-            raise PostGenerationError("'services juridiques' détecté. Utilise 'produits juridiques' à la place.")
-
         banned = [
             "révolution de l'IA", "changer la donne", "à l'ère du digital",
             "le futur est maintenant", "game changer", "monde numérique",
@@ -478,9 +496,6 @@ Post à raccourcir:
         for phrase in banned:
             if phrase.lower() in post.lower():
                 raise PostGenerationError(f"Phrase interdite détectée: '{phrase}'")
-
-        if "\u2014" in post or "\u2013" in post:
-            raise PostGenerationError("Tiret cadratin (—) ou demi-cadratin (–) détecté. Interdit.")
 
         if re.search(r"\*\*.*?\*\*", post):
             raise PostGenerationError("Le post contient du gras (**texte**). Interdit.")
