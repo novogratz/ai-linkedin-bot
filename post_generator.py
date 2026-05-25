@@ -35,10 +35,10 @@ Rules:
 - "Chez Neolegal" or "notre expérience" max 2 times total, used naturally mid-post as context.
 - Neolegal IS an AI/tech platform (NeoDoc, web platform, automated workflows). Never imply Neolegal doesn't do AI or tech.
 - Use "produits juridiques" : never "services juridiques".
-- USE REAL NUMBERS from the sources to make it impactful. Each source has real data below.
-- Reference 1-2 sources using EXACT URLs provided. Do not invent URLs.
+- USE REAL NUMBERS only when a fresh authorized source is available. Do not force a statistic.
+- Reference 0-1 fresh source using EXACT URLs provided. If no fresh source is available, write without any URL.
 - INTEGRATE URLs INLINE in the text, right next to the stat they support. NO "Sources:" section at the end.
-- Chaque chiffre/statistique doit être immédiatement suivi de sa source URL entre parenthèses. Exemple: "(https://borealsignal.ca/...)"
+- Chaque chiffre/statistique doit être immédiatement suivi de sa source URL entre parenthèses. Si aucune URL fraîche n'est autorisée aujourd'hui, n'écris aucun chiffre/statistique externe.
 - NEVER invent statistics. Only use numbers you've seen in the provided sources.
 - End with a sharp question inviting comment.
 - NEVER use bold (**text**).
@@ -86,6 +86,7 @@ SOURCE_URLS = {url for _, url in SOURCE_REFERENCES}
 SOURCE_URLS_LIST = list(SOURCE_URLS)
 CONTENT_SOURCE_URLS = SOURCE_URLS - {"https://www.neolegal.ca"}
 RECENT_HISTORY_LIMIT = 5
+ALL_HISTORY_LIMIT = 200
 
 # Known real stats from SOURCE_REFERENCES (used to catch invented numbers)
 KNOWN_PERCENTAGES = {"92%", "9.2%", "9,2%", "85%", "51%", "15%"}
@@ -129,7 +130,7 @@ TON ET POSITIONNEMENT:
 - "produits juridiques" toujours : JAMAIS "services juridiques".
 - Neolegal utilise l'IA et la tech (NeoDoc, plateforme, automatisation). Ne sous-entends JAMAIS que Neolegal ne fait pas d'IA.
 - Observation concrète du terrain, pas de prédiction vague.
-- Utilise des CHIFFRES RÉELS des sources pour frapper fort. Une donnée concrète rend un post 10x plus partageable.
+- Utilise un CHIFFRE RÉEL seulement si une source fraîche autorisée est disponible. Sinon, aucun chiffre externe.
 
 RÈGLES STRICTES:
 - POST EN FRANÇAIS INTÉGRALEMENT.
@@ -139,20 +140,14 @@ RÈGLES STRICTES:
 - Opinion nette et défendable. Pas de neutralité.
 - Pas de hashtags du tout.
 - Pas de gras (**).
-- N'invente JAMAIS un nom de source ou de rapport. Utilise UNIQUEMENT les URLs fournies ci-dessous.
+- N'invente JAMAIS un nom de source ou de rapport. Utilise UNIQUEMENT les URLs autorisées aujourd'hui.
 - N'invente JAMAIS de chiffres. Chaque nombre que tu écris doit venir textuellement de la source.
-- Chaque chiffre/statistique doit être IMMÉDIATEMENT suivi de sa source URL entre parenthèses. Exemple: "... 85% des cabinets subissent la pression client sur l'IA (https://digitalitnews.com/litera-releases-state-of-legal-ai-2026-report/)."
+- Chaque chiffre/statistique doit être IMMÉDIATEMENT suivi de sa source URL entre parenthèses. Si aucune URL fraîche n'est autorisée aujourd'hui, n'écris aucun chiffre/statistique externe.
 - N'AJOUTE PAS de section "Sources:" à la fin. Les URLs sont intégrées en ligne dans le texte.
 - "services juridiques" est INTERDIT. C'est toujours "produits juridiques".
 - Ne fais JAMAIS de fausse opposition: ne dis pas "alors que les autres / pendant que d'autres / contrairement aux autres" pour sous-entendre que Neolegal ne fait pas d'IA.
-- Les URLs autorisées sont:
-  1. https://www.neolegal.ca
-  2. https://www.lawnext.com/2026/05/lawdroid-launches-free-open-source-claude-ai-plugin-for-civil-legal-aid.html
-  3. https://borealsignal.ca/stories/fixed-fee-justice-how-ai-is-reshaping-legal-billing-and-access-to-counsel
-  4. https://digitalitnews.com/litera-releases-state-of-legal-ai-2026-report/
-  5. https://www.giiresearch.com/report/tbrc1975880-legal-technology-global-market-report.html
-  6. https://www.thomsonreuters.com/en/press-releases/2026/may/thomson-reuters-and-anthropic-expand-partnership-to-connect-claude-with-cocounsel-legal
-  7. https://www.thomsonreuters.com/en/press-releases/2026/january/legal-industry-experiencing-tectonic-shift-technology-talent-and-demand-prompting-law-firms-to-evolve
+- SOURCES AUTORISÉES AUJOURD'HUI:
+{source_rules}
 - Termine par une question forte.
 
 MÉMOIRE DES POSTS RÉCENTS:
@@ -202,16 +197,36 @@ class TopicTracker:
         self._used_urls: set[str] = set()
         self._used_angle_indices: set[int] = set()
         self._load()
+        self._load_existing_posts()
 
     def _load(self) -> None:
         if not self.path.exists():
             return
         try:
             data = json.loads(self.path.read_text(encoding="utf-8"))
-            self._used_urls = set(data.get("used_urls", []))
+            raw_urls = set(data.get("used_urls", []))
+            self._used_urls = raw_urls & CONTENT_SOURCE_URLS
             self._used_angle_indices = set(data.get("used_angle_indices", []))
+            if self._used_urls != raw_urls:
+                self.save()
         except (json.JSONDecodeError, KeyError):
             self.logger.warning("Failed to load used_topics.json, starting fresh")
+
+    def _load_existing_posts(self) -> None:
+        posts_dir = self.path.parent
+        if not posts_dir.exists():
+            return
+
+        before = set(self._used_urls)
+        for path in posts_dir.glob("*.md"):
+            try:
+                text = path.read_text(encoding="utf-8")
+            except OSError:
+                continue
+            found_urls = {url.rstrip(").,;:!?") for url in re.findall(r"https?://\S+", text)}
+            self._used_urls.update(found_urls & CONTENT_SOURCE_URLS)
+        if self._used_urls != before:
+            self.save()
 
     def save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -222,9 +237,9 @@ class TopicTracker:
         self.path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
     def record(self, post: str) -> None:
-        found_urls = set(re.findall(r"https?://\S+", post))
+        found_urls = {url.rstrip(").,;:!?") for url in re.findall(r"https?://\S+", post)}
         for url in found_urls:
-            if url in SOURCE_URLS:
+            if url in CONTENT_SOURCE_URLS:
                 self._used_urls.add(url)
         self.save()
 
@@ -232,10 +247,13 @@ class TopicTracker:
         return url in self._used_urls
 
     def available_sources(self) -> list[tuple[str, str]]:
-        return [(t, u) for t, u in SOURCE_REFERENCES if u not in self._used_urls]
+        return [(t, u) for t, u in SOURCE_REFERENCES if u not in self._used_urls and u in CONTENT_SOURCE_URLS]
 
     def available_urls(self) -> list[str]:
         return [u for u in SOURCE_URLS_LIST if u not in self._used_urls]
+
+    def used_urls(self) -> set[str]:
+        return set(self._used_urls)
 
     def fresh_angle(self) -> str:
         unused = [i for i in range(len(ANGLES)) if i not in self._used_angle_indices]
@@ -289,6 +307,7 @@ class PostGenerator:
                 prompt = USER_PROMPT_TEMPLATE.format(
                     today=post_date.isoformat(),
                     angle_instruction=angle,
+                    source_rules=self._source_rules(),
                     history_guidance=self._history_guidance(),
                 )
                 self.logger.info("Generating LinkedIn post with Ollama model %s", self.config.model)
@@ -307,7 +326,6 @@ class PostGenerator:
                     cleaned = self._shrink_post(cleaned, post_date)
                     shrink_count += 1
 
-                cleaned = self._ensure_source_url(cleaned)
                 cleaned = self._auto_fix(cleaned)
                 self._validate_post(cleaned)
 
@@ -424,14 +442,7 @@ Règles:
 - Pas de statistiques inventées (X%, "selon une étude").
 - Sortie finale entre 1800 et 2500 caractères.
 - Ton personnel et direct.
-- Inclus au moins une URL exacte (parmi la liste autorisée):
-  - https://www.neolegal.ca
-  - https://www.lawnext.com/2026/05/lawdroid-launches-free-open-source-claude-ai-plugin-for-civil-legal-aid.html
-  - https://borealsignal.ca/stories/fixed-fee-justice-how-ai-is-reshaping-legal-billing-and-access-to-counsel
-  - https://digitalitnews.com/litera-releases-state-of-legal-ai-2026-report/
-  - https://www.giiresearch.com/report/tbrc1975880-legal-technology-global-market-report.html
-  - https://www.thomsonreuters.com/en/press-releases/2026/may/thomson-reuters-and-anthropic-expand-partnership-to-connect-claude-with-cocounsel-legal
-  - https://www.thomsonreuters.com/en/press-releases/2026/january/legal-industry-experiencing-tectonic-shift-technology-talent-and-demand-prompting-law-firms-to-evolve
+- Garde uniquement une URL déjà présente dans le brouillon. Si le brouillon n'a pas d'URL, n'en ajoute pas.
 - Retourne uniquement le texte final.
 
 Brouillon:
@@ -453,13 +464,22 @@ Post à raccourcir:
 """
         return self._clean_response(self._call_ollama(prompt))
 
-    @staticmethod
-    def _ensure_source_url(post: str) -> str:
-        real_urls = {url for _, url in SOURCE_REFERENCES}
-        found_urls = set(re.findall(r"https?://\S+", post))
-        if real_urls & found_urls:
-            return post
-        return f"{post.rstrip()}\n\nPlus d'info sur les produits juridiques à forfait: https://www.neolegal.ca"
+    def _source_rules(self) -> str:
+        available_sources = self.topic_tracker.available_sources()
+        if not available_sources:
+            return (
+                "- Aucune source externe fraîche n'est disponible aujourd'hui.\n"
+                "- Écris le post sans URL externe et sans statistique externe.\n"
+                "- Tu peux mentionner Neolegal comme contexte, mais n'ajoute pas https://www.neolegal.ca juste pour remplir."
+            )
+
+        lines = [
+            "- Utilise au maximum UNE de ces sources fraîches. N'utilise aucune URL absente de cette liste.",
+        ]
+        for index, (title, url) in enumerate(available_sources, start=1):
+            lines.append(f"  {index}. {title} | {url}")
+        lines.append("- Si aucune de ces sources ne sert vraiment l'angle, écris sans URL.")
+        return "\n".join(lines)
 
     @staticmethod
     def _auto_fix(post: str) -> str:
@@ -511,9 +531,6 @@ Post à raccourcir:
         if char_count > 2500:
             raise PostGenerationError(f"Post trop long ({char_count} caractères). Maximum 2500.")
 
-        if "http://" not in post and "https://" not in post:
-            raise PostGenerationError("Aucune URL source trouvée dans le post.")
-
         banned = [
             "révolution de l'IA", "changer la donne", "à l'ère du digital",
             "le futur est maintenant", "game changer", "monde numérique",
@@ -553,11 +570,11 @@ Post à raccourcir:
                 f"URL non autorisée détectée: {', '.join(sorted(invalid_urls))}."
             )
 
-        recent_urls = self._recent_source_urls()
-        repeated_urls = (found_urls & CONTENT_SOURCE_URLS) & recent_urls
-        if repeated_urls and len(recent_urls) < len(CONTENT_SOURCE_URLS):
+        all_urls = self._all_source_urls()
+        repeated_urls = (found_urls & CONTENT_SOURCE_URLS) & all_urls
+        if repeated_urls:
             raise PostGenerationError(
-                f"Source déjà utilisée récemment: {', '.join(sorted(repeated_urls))}."
+                f"Source déjà utilisée dans l'historique: {', '.join(sorted(repeated_urls))}."
             )
 
         # catch invented percentages not in KNOWN_PERCENTAGES
@@ -569,14 +586,17 @@ Post à raccourcir:
                 f"Seuls les chiffres réels des sources sont autorisés."
             )
 
-        repeated_stats = found_pcts & self._recent_percentages()
+        repeated_stats = found_pcts & self._all_percentages()
         if repeated_stats:
             raise PostGenerationError(
-                f"Statistique déjà utilisée récemment: {', '.join(sorted(repeated_stats))}."
+                f"Statistique déjà utilisée dans l'historique: {', '.join(sorted(repeated_stats))}."
             )
 
         if len(found_pcts) > 1:
             raise PostGenerationError("Trop de statistiques dans le post. Maximum 1 statistique externe.")
+
+        if found_pcts and not (found_urls & CONTENT_SOURCE_URLS):
+            raise PostGenerationError("Statistique sans source externe fraîche détectée.")
 
         dollar_values = set(re.findall(
             r"(?:\$|CA\$)\s?\d+(?:[.,]\d+)?\s?(?:B|M|milliards?|millions?)?"
@@ -609,8 +629,8 @@ Post à raccourcir:
         if not recent_posts:
             return "- Aucun post récent sauvegardé."
 
-        recent_urls = sorted(self._recent_source_urls())
-        recent_pcts = sorted(self._recent_percentages())
+        all_urls = sorted(self._all_source_urls())
+        all_pcts = sorted(self._all_percentages())
         hooks = []
         for post in recent_posts:
             first_line = next((line.strip() for line in post.splitlines() if line.strip()), "")
@@ -620,10 +640,10 @@ Post à raccourcir:
         lines = [
             "- Interdit de reprendre ces hooks récents: " + " | ".join(hooks[:RECENT_HISTORY_LIMIT]),
         ]
-        if recent_pcts:
-            lines.append("- Statistiques déjà utilisées récemment, donc interdites aujourd'hui: " + ", ".join(recent_pcts))
-        if recent_urls:
-            lines.append("- URLs déjà utilisées récemment, donc évite-les aujourd'hui: " + ", ".join(recent_urls))
+        if all_pcts:
+            lines.append("- Statistiques déjà utilisées dans tout l'historique, donc interdites aujourd'hui: " + ", ".join(all_pcts))
+        if all_urls:
+            lines.append("- URLs déjà utilisées dans tout l'historique, donc interdites aujourd'hui: " + ", ".join(all_urls))
         lines.append("- Ne répète pas les thèmes déjà vus: pression client IA, marché global legaltech, 92% access to justice, taux horaire vs forfait.")
         return "\n".join(lines)
 
@@ -647,6 +667,29 @@ Post à raccourcir:
     def _recent_percentages(self) -> set[str]:
         percentages: set[str] = set()
         for post in self._recent_post_texts():
+            percentages.update(re.findall(r"\b\d+(?:[.,]\d+)?%", post))
+        return percentages
+
+    def _all_post_texts(self, limit: int = ALL_HISTORY_LIMIT) -> list[str]:
+        candidates = sorted(self.posts_dir.glob("*.md"), key=lambda p: p.stat().st_mtime, reverse=True)
+        posts = []
+        for path in candidates[:limit]:
+            try:
+                text = path.read_text(encoding="utf-8")
+            except OSError:
+                continue
+            posts.append(re.sub(r"^#.*?\n+", "", text, flags=re.DOTALL).strip())
+        return posts
+
+    def _all_source_urls(self) -> set[str]:
+        urls: set[str] = self.topic_tracker.used_urls()
+        for post in self._all_post_texts():
+            urls.update(url.rstrip(").,;:!?") for url in re.findall(r"https?://\S+", post))
+        return urls & CONTENT_SOURCE_URLS
+
+    def _all_percentages(self) -> set[str]:
+        percentages: set[str] = set()
+        for post in self._all_post_texts():
             percentages.update(re.findall(r"\b\d+(?:[.,]\d+)?%", post))
         return percentages
 
